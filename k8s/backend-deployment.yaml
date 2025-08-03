@@ -48,13 +48,14 @@ apiVersion: v1
 kind: Service
 metadata:
   name: backend-service
+  namespace: mindx-projects
   labels:
     app: backend
   annotations:
     service.beta.kubernetes.io/azure-load-balancer-resource-group: "mindx-individual-banv-rg"
 spec:
   type: LoadBalancer
-  loadBalancerIP: <your-static-ip>
+  loadBalancerIP: 20.157.31.86
   selector:
     app: backend
   ports:

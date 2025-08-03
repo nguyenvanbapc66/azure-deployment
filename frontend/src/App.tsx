@@ -4,7 +4,7 @@ import viteLogo from "/vite.svg";
 import "./App.css";
 
 // Use runtime environment variable or fallback to build-time
-const API_URL = (window as Window & { ENV_API_URL?: string }).ENV_API_URL || import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
   const [count, setCount] = useState(0);
