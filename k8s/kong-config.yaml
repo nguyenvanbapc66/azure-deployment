@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kong-config
+  namespace: mindx-projects
+data:
+  kong.yml: |
+    _format_version: "2.1"
+    _transform: true
+
+    consumers:
+      - username: api-user
+        custom_id: api-user-001
+        keyauth_credentials:
+          - key: "your-secret-api-key-12345"
+
+    services:
+      - name: frontend-service
+        url: http://frontend-service:80
+        routes:
+          - name: frontend-route
+            protocols:
+              - http
+              - https
+            paths:
+              - /
+            strip_path: false
+            preserve_host: true
+        plugins:
+          - name: cors
+            config:
+              origins:
+                - "*"
+              methods:
+                - GET
+                - POST
+                - PUT
+                - DELETE
+                - OPTIONS
+              headers:
+                - Accept
+                - Accept-Version
+                - Content-Length
+                - Content-MD5
+                - Content-Type
+                - Date
+                - Authorization
+              exposed_headers:
+                - X-Auth-Token
+              credentials: true
+              max_age: 3600
+              preflight_continue: false
+          - name: request-size-limiting
+            config:
+              allowed_payload_size: 10
+          - name: rate-limiting
+            config:
+              minute: 200
+              hour: 2000
+              policy: local
+      
+      - name: backend-service
+        url: http://backend-service:5000
+        routes:
+          - name: api-route
+            protocols:
+              - http
+              - https
+            paths:
+              - /api
+            strip_path: true
+            preserve_host: true
+        plugins:
+          - name: rate-limiting
+            config:
+              minute: 100
+              hour: 1000
+              policy: local
+          - name: key-auth
+            config:
+              key_names:
+                - apikey
+              hide_credentials: true
+              key_in_header: true
+              key_in_query: false
+              key_in_body: false
+              run_on_preflight: true
+          - name: request-size-limiting
+            config:
+              allowed_payload_size: 5
+          - name: ip-restriction
+            config:
+              allow:
+                - 0.0.0.0/0
+              deny: []

@@ -5,12 +5,21 @@ import "./App.css";
 
 // Use runtime environment variable or fallback to build-time
 const API_URL = import.meta.env.VITE_API_URL;
+const API_KEY = import.meta.env.VITE_API_KEY;
 
 function App() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    fetch(`${API_URL}`)
+    console.log("API_URL:", API_URL);
+    console.log("API_KEY:", API_KEY);
+
+    fetch(`${API_URL}`, {
+      headers: {
+        apikey: API_KEY || "",
+        "Content-Type": "application/json",
+      },
+    })
       .then((res) => res.json())
       .then((data) => {
         console.log(data);

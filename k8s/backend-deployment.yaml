@@ -51,11 +51,8 @@ metadata:
   namespace: mindx-projects
   labels:
     app: backend
-  annotations:
-    service.beta.kubernetes.io/azure-load-balancer-resource-group: "mindx-individual-banv-rg"
 spec:
-  type: LoadBalancer
-  loadBalancerIP: 20.157.31.86
+  type: ClusterIP
   selector:
     app: backend
   ports:
