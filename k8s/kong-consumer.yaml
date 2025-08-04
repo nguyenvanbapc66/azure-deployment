@@ -1,0 +1,9 @@
+apiVersion: configuration.konghq.com/v1
+kind: KongConsumer
+metadata:
+  name: api-user
+  namespace: mindx-projects
+  annotations:
+    kubernetes.io/ingress.class: kong
+username: api-user
+custom_id: api-user-001

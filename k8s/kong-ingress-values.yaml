@@ -1,0 +1,43 @@
+# Kong Ingress Controller Configuration
+# This file configures Kong Ingress Controller with your static IP
+
+# Use Kong Ingress Controller (not Kong Gateway)
+gateway:
+  enabled: false
+
+# Enable Kong Ingress Controller
+ingressController:
+  enabled: true
+  installCRDs: false
+
+# Configure the proxy service
+proxy:
+  enabled: true
+  type: LoadBalancer
+  loadBalancerIP: "20.157.31.86"
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-resource-group: "mindx-individual-banv-rg"
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 8443
+      protocol: TCP
+
+# Configure Kong Admin API
+admin:
+  enabled: true
+  type: ClusterIP
+  port: 8001
+
+# Configure Kong environment
+env:
+  database: "off"
+  nginx_worker_processes: "2"
+  proxy_access_log: "/dev/stdout"
+  admin_access_log: "/dev/stdout"
+  proxy_error_log: "/dev/stderr"
+  admin_error_log: "/dev/stderr"

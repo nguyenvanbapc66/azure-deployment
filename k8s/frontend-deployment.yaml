@@ -21,9 +21,7 @@ spec:
             - containerPort: 80
           env:
             - name: VITE_API_URL
-              value: "http://20.157.31.86/api"
-            - name: VITE_API_KEY
-              value: "your-secret-api-key-12345"
+              value: "http://kong-ingress-kong-proxy.mindx-projects.svc.cluster.local:80/api"
           resources:
             requests:
               memory: "64Mi"
