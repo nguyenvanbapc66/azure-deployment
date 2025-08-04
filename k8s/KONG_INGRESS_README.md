@@ -117,13 +117,13 @@ Kubernetes Ingress resources:
 
 ### Frontend
 
-- **URL**: http://20.157.31.86/
+- **URL**: http://banv-app-dev.mindx.edu.vn/
 - **Features**: CORS enabled, rate limiting
 - **Status**: ✅ Working
 
 ### Backend API
 
-- **URL**: http://20.157.31.86/api/
+- **URL**: http://banv-api-dev.mindx.edu.vn/
 - **Authentication**: API key required
 - **Headers**: `apikey: your-secret-api-key-12345`
 - **Status**: 🔒 Protected (401 without key)
@@ -142,13 +142,13 @@ Run the test script to verify the setup:
 
 ```bash
 # Test frontend
-curl -I http://20.157.31.86/
+curl -I http://banv-app-dev.mindx.edu.vn/
 
 # Test backend without API key (should return 401)
-curl -I http://20.157.31.86/api/
+curl -I http://banv-api-dev.mindx.edu.vn/
 
 # Test backend with API key
-curl -H "apikey: your-secret-api-key-12345" http://20.157.31.86/api/
+curl -H "apikey: your-secret-api-key-12345" http://banv-api-dev.mindx.edu.vn/
 ```
 
 ## 🔧 Management Commands
