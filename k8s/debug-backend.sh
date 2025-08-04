@@ -1,19 +1,14 @@
 #!/bin/bash
 
-echo "🔍 Debugging Backend Connectivity with Kong Ingress Controller"
-echo "============================================================="
+echo "🔍 Debugging Backend Connectivity with Kong Ingress Controller and Custom Domains"
+echo "================================================================================"
 
-# Get Kong proxy IP
-KONG_IP=$(kubectl get service kong-ingress-kong-proxy -n mindx-projects -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+# Configuration
+FRONTEND_DOMAIN="banv-app-dev.mindx.edu.vn"
+BACKEND_DOMAIN="banv-api-dev.mindx.edu.vn"
 
-if [ -z "$KONG_IP" ]; then
-    echo "❌ Kong proxy IP not found"
-    echo "Checking Kong Ingress Controller status..."
-    kubectl get pods -n mindx-projects | grep kong
-    exit 1
-fi
-
-echo "🌐 Kong Proxy IP: $KONG_IP"
+echo "🌐 Frontend Domain: $FRONTEND_DOMAIN"
+echo "🌐 Backend Domain: $BACKEND_DOMAIN"
 echo ""
 
 # Check Kong Ingress Controller status
@@ -31,7 +26,7 @@ echo "🔌 Kong Plugins:"
 kubectl get kongplugin -n mindx-projects
 echo ""
 
-# Check Kong consumer and credential
+# Check Kong consumer
 echo "👤 Kong Consumer:"
 kubectl get kongconsumer -n mindx-projects
 echo ""
@@ -40,10 +35,14 @@ echo "🔑 Kong Credential:"
 echo "Note: KongCredential CRD not available, using Kong Admin API instead"
 echo ""
 
-# Test backend connectivity
-echo "🧪 Testing Backend Connectivity:"
-echo "1. Testing backend access:"
-curl -s -o /dev/null -w "Status: %{http_code}\n" http://$KONG_IP/api/
+# Test domain connectivity
+echo "🧪 Testing Domain Connectivity:"
+echo "1. Testing frontend domain:"
+curl -s -o /dev/null -w "Status: %{http_code}\n" http://$FRONTEND_DOMAIN/
+
+echo ""
+echo "2. Testing backend domain:"
+curl -s -o /dev/null -w "Status: %{http_code}\n" http://$BACKEND_DOMAIN/
 
 echo ""
 echo "3. Testing backend service directly (internal):"
@@ -51,13 +50,16 @@ kubectl run test-pod --image=curlimages/curl --rm -it --restart=Never -- \
   curl -s -o /dev/null -w "Status: %{http_code}\n" http://backend-service.mindx-projects.svc.cluster.local:5000/
 
 echo ""
-echo "4. Testing Kong proxy service (internal):"
-kubectl run test-pod --image=curlimages/curl --rm -it --restart=Never -- \
-  curl -s -o /dev/null -w "Status: %{http_code}\n" \
-  http://kong-ingress-kong-proxy.mindx-projects.svc.cluster.local:80/api/
+echo "4. Testing DNS resolution:"
+echo "Frontend DNS:"
+nslookup $FRONTEND_DOMAIN 2>/dev/null || echo "nslookup not available"
+echo ""
+echo "Backend DNS:"
+nslookup $BACKEND_DOMAIN 2>/dev/null || echo "nslookup not available"
 
 echo ""
 echo "🔧 Troubleshooting Tips:"
-echo "- If external access fails but internal works: Check LoadBalancer configuration"
+echo "- If domains don't resolve: Check DNS configuration"
+echo "- If domains resolve but return errors: Check Kong Ingress Controller"
 echo "- If backend is unreachable: Check backend deployment and service"
 echo "- If Kong is not ready: Check Kong Ingress Controller logs" 

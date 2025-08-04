@@ -21,7 +21,7 @@ spec:
             - containerPort: 80
           env:
             - name: VITE_API_URL
-              value: "http://kong-ingress-kong-proxy.mindx-projects.svc.cluster.local:80/api"
+              value: "http://banv-api-dev.mindx.edu.vn"
           resources:
             requests:
               memory: "64Mi"

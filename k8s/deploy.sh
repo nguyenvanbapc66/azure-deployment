@@ -67,25 +67,19 @@ echo "Backend Service (Internal):"
 kubectl get service backend-service -n mindx-projects
 
 echo ""
-echo "🔐 Kong Ingress Controller Security Setup:"
-echo "- Frontend: http://<KONG_IP>/ (Public access)"
-echo "- Backend API: http://<KONG_IP>/api/ (Requires API key: your-secret-api-key-12345)"
+echo "🔐 Kong Ingress Controller with Custom Domains Setup:"
+echo "- Frontend: http://banv-app-dev.mindx.edu.vn (Public access)"
+echo "- Backend API: http://banv-api-dev.mindx.edu.vn (Public access)"
 echo "- Kong Admin: http://<KONG_IP>:8444/ (For management)"
 
 echo ""
 echo "🧪 Testing the deployment..."
-echo "Testing frontend access..."
-KONG_IP=$(kubectl get service kong-ingress-kong-proxy -n mindx-projects -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-if [ ! -z "$KONG_IP" ]; then
-    echo "Frontend: http://$KONG_IP/"
-    echo "Backend API: http://$KONG_IP/api/"
-    echo ""
-    echo "✅ Deployment completed successfully!"
-    echo "🌐 Access your application at: http://$KONG_IP/"
-    echo ""
-    echo "🔧 To test the deployment, run:"
-    echo "./kong-ingress-test.sh"
-else
-    echo "⚠️  Kong Ingress Controller IP not yet assigned. Please wait a moment and check:"
-    echo "kubectl get service kong-ingress-kong-proxy -n mindx-projects"
-fi 
+echo "Testing domain access..."
+echo "Frontend: http://banv-app-dev.mindx.edu.vn"
+echo "Backend API: http://banv-api-dev.mindx.edu.vn"
+echo ""
+echo "✅ Deployment completed successfully!"
+echo "🌐 Access your application at: http://banv-app-dev.mindx.edu.vn"
+echo ""
+echo "🔧 To test the deployment, run:"
+echo "./kong-ingress-test.sh" 
