@@ -7,8 +7,13 @@ metadata:
     konghq.com/strip-path: "false"
     konghq.com/preserve-host: "true"
     konghq.com/plugins: "cors-plugin,rate-limiting-plugin"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: kong
+  tls:
+    - hosts:
+        - banv-app-dev.mindx.edu.vn
+      secretName: frontend-tls
   rules:
     - host: banv-app-dev.mindx.edu.vn
       http:
@@ -30,8 +35,13 @@ metadata:
     konghq.com/strip-path: "true"
     konghq.com/preserve-host: "true"
     konghq.com/plugins: "rate-limiting-plugin"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: kong
+  tls:
+    - hosts:
+        - banv-api-dev.mindx.edu.vn
+      secretName: backend-tls
   rules:
     - host: banv-api-dev.mindx.edu.vn
       http:

@@ -7,7 +7,7 @@ DOCKER_USERNAME="mindxtech"
 REPOSITORY_NAME="banv-starter"
 IMAGE_TAG="latest"
 BACKEND_TAG="backend"
-BACKEND_URL="http://banv-api-dev.mindx.edu.vn"
+BACKEND_URL="https://banv-api-dev.mindx.edu.vn"
 
 echo "📦 Building frontend image for multiple platforms..."
 docker buildx build --platform linux/amd64,linux/arm64 \

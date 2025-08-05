@@ -4,10 +4,10 @@ kind: Kustomization
 namespace: mindx-projects
 
 resources:
-  - namespace.yaml
+  - app-namespace.yaml
   - configmap.yaml
-  - frontend-deployment.yaml
-  - backend-deployment.yaml
+  - app-frontend-deployment.yaml
+  - app-backend-deployment.yaml
 
 commonLabels:
   app.kubernetes.io/name: mindx-projects
