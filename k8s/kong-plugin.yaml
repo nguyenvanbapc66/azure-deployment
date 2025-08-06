@@ -9,11 +9,13 @@ plugin: key-auth
 config:
   key_names:
     - apikey
+    - x-api-key
   hide_credentials: true
   key_in_header: true
   key_in_query: false
   key_in_body: false
   run_on_preflight: true
+  anonymous: "api-user" # Open comment to allow access without api key
 ---
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
@@ -40,8 +42,14 @@ config:
     - Content-Type
     - Date
     - Authorization
+    - apikey
+    - x-api-key
+    - X-Anonymous-User
+    - X-Request-Type
   exposed_headers:
     - X-Auth-Token
+    - X-User-Type
+    - X-User-ID
   credentials: true
   max_age: 3600
   preflight_continue: false

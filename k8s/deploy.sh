@@ -28,6 +28,11 @@ echo "🔐 Checking cert-manager installation..."
 helm repo add jetstack https://charts.jetstack.io
 helm repo update
 
+# Install Kong Ingress Controller using Helm
+echo "🔐 Installing Kong Ingress Controller..."
+helm repo add kong https://charts.konghq.com
+helm repo update
+
 # Check if cert-manager is already installed
 if ! helm list -n mindx-projects | grep -q cert-manager; then
     echo "📦 Installing cert-manager for SSL/TLS certificates..."
@@ -51,11 +56,6 @@ fi
 # Apply ClusterIssuer for Let's Encrypt
 echo "🔑 Applying ClusterIssuer for Let's Encrypt..."
 kubectl apply -f cluster-issuer.yaml
-
-# Install Kong Ingress Controller using Helm
-echo "🔐 Installing Kong Ingress Controller..."
-helm repo add kong https://charts.konghq.com
-helm repo update
 
 # Check if Kong is already installed
 if ! helm list -n mindx-projects | grep -q kong-ingress; then

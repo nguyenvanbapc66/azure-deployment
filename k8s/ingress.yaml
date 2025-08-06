@@ -34,7 +34,7 @@ metadata:
   annotations:
     konghq.com/strip-path: "true"
     konghq.com/preserve-host: "true"
-    konghq.com/plugins: "rate-limiting-plugin"
+    konghq.com/plugins: "key-auth-plugin,cors-plugin,rate-limiting-plugin"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
   ingressClassName: kong
