@@ -14,7 +14,7 @@ echo ""
 
 # Check cert-manager status
 echo "📊 Cert-manager Status:"
-kubectl get pods -n mindx-projects | grep cert-manager
+kubectl get pods -n banv-projects | grep cert-manager
 echo ""
 
 # Check ClusterIssuer status
@@ -24,22 +24,22 @@ echo ""
 
 # Check certificate status
 echo "📜 Certificate Status:"
-kubectl get certificate -n mindx-projects
+kubectl get certificate -n banv-projects
 echo ""
 
 # Check certificate requests
 echo "📋 Certificate Requests:"
-kubectl get certificaterequest -n mindx-projects
+kubectl get certificaterequest -n banv-projects
 echo ""
 
 # Check orders (Let's Encrypt)
 echo "📝 Let's Encrypt Orders:"
-kubectl get order -n mindx-projects
+kubectl get order -n banv-projects
 echo ""
 
 # Check challenges
 echo "🎯 ACME Challenges:"
-kubectl get challenge -n mindx-projects
+kubectl get challenge -n banv-projects
 echo ""
 
 # Test HTTPS connectivity

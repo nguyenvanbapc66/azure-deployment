@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: app-config
-  namespace: mindx-projects
+  namespace: banv-projects
 data:
   NODE_ENV: "production"
   PORT: "5000"

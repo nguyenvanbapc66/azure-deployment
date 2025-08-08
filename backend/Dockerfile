@@ -6,6 +6,9 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
+ARG FRONTEND_URL
+ENV FRONTEND_URL=${FRONTEND_URL}
+
 COPY . .
 RUN npm run build
 

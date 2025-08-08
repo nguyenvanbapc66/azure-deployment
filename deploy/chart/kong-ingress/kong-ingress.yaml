@@ -1,8 +1,9 @@
+# Frontend Ingress
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: frontend-ingress
-  namespace: mindx-projects
+  namespace: banv-projects
   annotations:
     konghq.com/strip-path: "false"
     konghq.com/preserve-host: "true"
@@ -26,13 +27,14 @@ spec:
                 port:
                   number: 80
 ---
+# Backend Ingress
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: backend-ingress
-  namespace: mindx-projects
+  namespace: banv-projects
   annotations:
-    konghq.com/strip-path: "true"
+    konghq.com/strip-path: "false"
     konghq.com/preserve-host: "true"
     konghq.com/plugins: "key-auth-plugin,cors-plugin,rate-limiting-plugin"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"

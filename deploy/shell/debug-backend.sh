@@ -13,22 +13,22 @@ echo ""
 
 # Check Kong Ingress Controller status
 echo "📊 Kong Ingress Controller Status:"
-kubectl get pods -n mindx-projects | grep kong
+kubectl get pods -n banv-projects | grep kong
 echo ""
 
 # Check Ingress resources
 echo "🌐 Ingress Resources:"
-kubectl get ingress -n mindx-projects
+kubectl get ingress -n banv-projects
 echo ""
 
 # Check Kong plugins
 echo "🔌 Kong Plugins:"
-kubectl get kongplugin -n mindx-projects
+kubectl get kongplugin -n banv-projects
 echo ""
 
 # Check Kong consumer
 echo "👤 Kong Consumer:"
-kubectl get kongconsumer -n mindx-projects
+kubectl get kongconsumer -n banv-projects
 echo ""
 
 echo "🔑 Kong Credential:"
@@ -47,7 +47,7 @@ curl -s -o /dev/null -w "Status: %{http_code}\n" http://$BACKEND_DOMAIN/
 echo ""
 echo "3. Testing backend service directly (internal):"
 kubectl run test-pod --image=curlimages/curl --rm -it --restart=Never -- \
-  curl -s -o /dev/null -w "Status: %{http_code}\n" http://backend-service.mindx-projects.svc.cluster.local:5000/
+  curl -s -o /dev/null -w "Status: %{http_code}\n" http://backend-service.banv-projects.svc.cluster.local:5000/
 
 echo ""
 echo "4. Testing DNS resolution:"

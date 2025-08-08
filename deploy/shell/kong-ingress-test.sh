@@ -6,9 +6,10 @@ echo "===================================================================="
 # Configuration
 FRONTEND_DOMAIN="banv-app-dev.mindx.edu.vn"
 BACKEND_DOMAIN="banv-api-dev.mindx.edu.vn"
-
+OIDC_DOMAIN="id-dev.mindx.edu.vn" # external IdP
 echo "🌐 Frontend Domain: https://$FRONTEND_DOMAIN"
 echo "🌐 Backend Domain: https://$BACKEND_DOMAIN"
+echo "🌐 OIDC Domain: https://$OIDC_DOMAIN"
 echo ""
 
 # Test frontend
@@ -30,9 +31,19 @@ else
     echo "❌ Backend returned unexpected status: $BACKEND_STATUS"
 fi
 
+# Test external IdP
+echo ""
+echo "🔒 Testing external OpenID Provider (https://$OIDC_DOMAIN/)"
+OIDC_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -k https://$OIDC_DOMAIN/)
+if [ "$OIDC_STATUS" = "200" ]; then
+    echo "✅ External OpenID Provider is accessible via HTTPS"
+else
+    echo "❌ External OpenID Provider returned unexpected status: $OIDC_STATUS"
+fi
+
 echo ""
 echo "📊 Kong Ingress Controller Status:"
-kubectl get pods -n mindx-projects | grep kong
+kubectl get pods -n banv-projects | grep kong
 
 echo ""
 echo "🔧 Next Steps:"

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: mindxtech/banv-starter:backend
+          image: mindxacrbanv.azurecr.io/banv-projects-backend:v1.5.0
           ports:
             - containerPort: 5000
           env:
@@ -24,6 +24,16 @@ spec:
               value: "production"
             - name: PORT
               value: "5000"
+            - name: FRONTEND_URL
+              value: "https://banv-app-dev.mindx.edu.vn"
+            - name: SESSION_SECRET
+              value: "your-session-secret"
+            - name: OAUTH_CLIENT_ID
+              value: "banv-aks"
+            - name: OAUTH_CLIENT_SECRET
+              value: "8daaa53ae9256b929f2b5a2ac04ce66375ed2f92ac"
+            - name: OAUTH_CALLBACK_URL
+              value: "https://banv-api-dev.mindx.edu.vn/oauth/openid/callback"
           resources:
             requests:
               memory: "128Mi"
@@ -33,13 +43,13 @@ spec:
               cpu: "200m"
           livenessProbe:
             httpGet:
-              path: /
+              path: /health
               port: 5000
             initialDelaySeconds: 30
             periodSeconds: 10
           readinessProbe:
             httpGet:
-              path: /
+              path: /health
               port: 5000
             initialDelaySeconds: 5
             periodSeconds: 5
@@ -48,7 +58,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: backend-service
-  namespace: mindx-projects
+  namespace: banv-projects
   labels:
     app: backend
 spec:

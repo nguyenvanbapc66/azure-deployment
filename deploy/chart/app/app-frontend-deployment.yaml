@@ -16,12 +16,14 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: mindxtech/banv-starter:latest
+          image: mindxacrbanv.azurecr.io/banv-projects-frontend:v1.5.0
           ports:
             - containerPort: 80
           env:
             - name: VITE_API_URL
               value: "https://banv-api-dev.mindx.edu.vn"
+            - name: VITE_OIDC_ISSUER
+              value: "https://id-dev.mindx.edu.vn"
           resources:
             requests:
               memory: "64Mi"
@@ -46,7 +48,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend-service
-  namespace: mindx-projects
+  namespace: banv-projects
   labels:
     app: frontend
 spec:

@@ -1,8 +1,9 @@
+# Key Auth Plugin
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
   name: key-auth-plugin
-  namespace: mindx-projects
+  namespace: banv-projects
   annotations:
     kubernetes.io/ingress.class: kong
 plugin: key-auth
@@ -17,11 +18,12 @@ config:
   run_on_preflight: true
   anonymous: "api-user" # Open comment to allow access without api key
 ---
+# Cors Plugin
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
   name: cors-plugin
-  namespace: mindx-projects
+  namespace: banv-projects
   annotations:
     kubernetes.io/ingress.class: kong
 plugin: cors
@@ -54,11 +56,12 @@ config:
   max_age: 3600
   preflight_continue: false
 ---
+# Rate Limiting Plugin
 apiVersion: configuration.konghq.com/v1
 kind: KongPlugin
 metadata:
   name: rate-limiting-plugin
-  namespace: mindx-projects
+  namespace: banv-projects
   annotations:
     kubernetes.io/ingress.class: kong
 plugin: rate-limiting
@@ -66,3 +69,30 @@ config:
   minute: 100
   hour: 1000
   policy: local
+---
+# OAuth2 Plugin for OpenID Connect SSO
+apiVersion: configuration.konghq.com/v1
+kind: KongPlugin
+metadata:
+  name: oauth2-plugin
+  namespace: banv-projects
+  annotations:
+    kubernetes.io/ingress.class: kong
+plugin: oauth2
+config:
+  scopes:
+    - openid
+    - profile
+    - email
+  mandatory_scope: true
+  enable_authorization_code: true
+  enable_client_credentials: false
+  enable_implicit_grant: false
+  enable_password_grant: false
+  token_expiration: 7200
+  refresh_token_ttl: 1209600
+  provision_key: "mindx-oauth-provision-key"
+  global_credentials: false
+  auth_header_name: "Authorization"
+  hide_credentials: false
+  anonymous: null

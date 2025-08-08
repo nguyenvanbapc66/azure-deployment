@@ -16,12 +16,16 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "oidc-provider": "^8.5.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/express-session": "^1.18.2",
     "@types/node": "^24.1.0",
+    "@types/oidc-provider": "^9.1.1",
     "eslint": "^9.32.0",
     "nodemon": "^3.1.10",
     "prettier": "^3.6.2",

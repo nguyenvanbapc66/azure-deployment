@@ -1,13 +1,11 @@
-FROM node:20 as build
+FROM node:20 AS build
 WORKDIR /app
 
 COPY package*.json ./
 RUN npm install
 
 ARG VITE_API_URL
-ARG VITE_API_KEY
-ENV VITE_API_URL=$VITE_API_URL
-ENV VITE_API_KEY=$VITE_API_KEY
+ENV VITE_API_URL=${VITE_API_URL}
 
 COPY . .
 RUN npm run build
@@ -21,3 +19,5 @@ RUN echo '#!/bin/sh' > /docker-entrypoint.d/30-inject-env.sh && \
     chmod +x /docker-entrypoint.d/30-inject-env.sh
 
 EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]

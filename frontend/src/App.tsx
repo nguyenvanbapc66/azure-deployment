@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import reactLogo from "./assets/react.svg";
 import viteLogo from "/vite.svg";
 import "./App.css";
+import { LoginButton } from "./components";
 
 // Use runtime environment variable or fallback to build-time
 const API_URL = import.meta.env.VITE_API_URL;
@@ -27,6 +28,32 @@ function App() {
       .catch((error) => {
         console.error("API Error:", error);
       });
+    fetch(`${API_URL}/api/items`, {
+      headers: {
+        apikey: API_KEY || "",
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("API Error:", error);
+      });
+    fetch(`${API_URL}/api/items123`, {
+      headers: {
+        apikey: API_KEY || "",
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("API Error:", error);
+      });
   }, []);
 
   return (
@@ -40,6 +67,10 @@ function App() {
         </a>
       </div>
       <h1>Vite + React</h1>
+
+      {/* MindX OAuth Login Button */}
+      <LoginButton apiUrl={API_URL} />
+
       <div className="card">
         <button onClick={() => setCount((count) => count + 1)}>count is {count}</button>
         <p>
