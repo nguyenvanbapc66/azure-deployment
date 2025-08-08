@@ -5,7 +5,7 @@ echo "=================================="
 
 # Configuration
 FRONTEND_DOMAIN="banv-app-dev.mindx.edu.vn"
-BACKEND_DOMAIN="banv-api-dev.mindx.edu.vn"
+BACKEND_DOMAIN="banv-api-dev.mindx.edu.vn/health"
 
 echo "🌐 Domains:"
 echo "- Frontend: https://$FRONTEND_DOMAIN"

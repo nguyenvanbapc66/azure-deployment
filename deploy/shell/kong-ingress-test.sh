@@ -23,7 +23,7 @@ fi
 
 # Test backend access
 echo ""
-echo "🔒 Testing Backend access (https://$BACKEND_DOMAIN/)"
+echo "🔒 Testing Backend access (https://$BACKEND_DOMAIN/health)"
 BACKEND_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -k https://$BACKEND_DOMAIN/)
 if [ "$BACKEND_STATUS" = "200" ]; then
     echo "✅ Backend is accessible via HTTPS"

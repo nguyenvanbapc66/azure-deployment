@@ -8,7 +8,7 @@ metadata:
     konghq.com/strip-path: "false"
     konghq.com/preserve-host: "true"
     konghq.com/plugins: "cors-plugin,rate-limiting-plugin"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/cluster-issuer: "letsencrypt-dev"
 spec:
   ingressClassName: kong
   tls:
@@ -37,7 +37,7 @@ metadata:
     konghq.com/strip-path: "false"
     konghq.com/preserve-host: "true"
     konghq.com/plugins: "key-auth-plugin,cors-plugin,rate-limiting-plugin"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    cert-manager.io/cluster-issuer: "letsencrypt-dev"
 spec:
   ingressClassName: kong
   tls:

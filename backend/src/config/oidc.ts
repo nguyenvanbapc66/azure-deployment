@@ -7,7 +7,7 @@ export const OIDC_CONFIG = {
   clients: [
     {
       client_id: "banv-aks",
-      client_secret: "banv-aks-secret",
+      client_secret: "8daaa53ae9256b929f2b5a2ac04ce66375ed2f92ac",
       grant_types: ["authorization_code"],
       redirect_uris: [
         "http://localhost:3000/oauth/openid/callback",
@@ -42,7 +42,7 @@ export const OIDC_CONFIG = {
   },
   interactions: {
     url(ctx: any, interaction: any) {
-      return `/oidc/interaction/${interaction.uid}`;
+      return `/interaction/${interaction.uid}`;
     },
   },
 };

@@ -39,25 +39,18 @@ helm repo update
 
 # Check if cert-manager is already installed
 echo "🔐 Checking cert-manager installation..."
-if helm list -n $NAMESPACE | grep -q cert-manager; then
-    echo "✅ Cert-manager is already installed"
-else
-    echo "🔐 Installing cert-manager for SSL/TLS certificates..."
-    if helm install cert-manager jetstack/cert-manager \
-      --namespace $NAMESPACE \
-      --version v1.13.3 \
-      --set installCRDs=true \
-      --set webhook.namespaceSelector.matchLabels.name=$NAMESPACE 2>/dev/null; then
-        echo "✅ Cert-manager installed successfully"
-        # Wait for cert-manager to be ready
-        echo "⏳ Waiting for cert-manager to be ready..."
-        kubectl wait --for=condition=available --timeout=300s deployment/cert-manager -n $NAMESPACE 2>/dev/null || echo "⚠️  Cert-manager deployment not found, continuing..."
-        kubectl wait --for=condition=available --timeout=300s deployment/cert-manager-cainjector -n $NAMESPACE 2>/dev/null || echo "⚠️  Cert-manager-cainjector deployment not found, continuing..."
-        kubectl wait --for=condition=available --timeout=300s deployment/cert-manager-webhook -n $NAMESPACE 2>/dev/null || echo "⚠️  Cert-manager-webhook deployment not found, continuing..."
-    else
-        echo "⚠️  Cert-manager installation failed, continuing without SSL..."
-    fi
-fi
+helm install cert-manager jetstack/cert-manager \
+    --namespace $NAMESPACE \
+    --version v1.13.3 \
+    --set installCRDs=true \
+    --set webhook.namespaceSelector.matchLabels.name=$NAMESPACE 2>/dev/null
+    
+echo "✅ Cert-manager installed successfully"
+# Wait for cert-manager to be ready
+echo "⏳ Waiting for cert-manager to be ready..."
+kubectl wait --for=condition=available --timeout=300s deployment/cert-manager -n $NAMESPACE 2>/dev/null || echo "⚠️  Cert-manager deployment not found, continuing..."
+kubectl wait --for=condition=available --timeout=300s deployment/cert-manager-cainjector -n $NAMESPACE 2>/dev/null || echo "⚠️  Cert-manager-cainjector deployment not found, continuing..."
+kubectl wait --for=condition=available --timeout=300s deployment/cert-manager-webhook -n $NAMESPACE 2>/dev/null || echo "⚠️  Cert-manager-webhook deployment not found, continuing..."
 
 # Apply ClusterIssuer for Let's Encrypt
 echo "🔑 Applying ClusterIssuer for Let's Encrypt..."
@@ -96,6 +89,10 @@ kubectl apply -k ./deploy/chart/kong-ingress
 
 # Apply Ingress resources with TLS
 echo "🌐 Applying Ingress resources with TLS..."
+# First, delete any existing certificates to force regeneration with correct issuer
+kubectl delete certificate frontend-tls backend-tls -n $NAMESPACE --ignore-not-found=true
+kubectl delete secret frontend-tls backend-tls -n $NAMESPACE --ignore-not-found=true
+# Apply the ingress configuration
 kubectl apply -f ./deploy/chart/kong-ingress/kong-ingress.yaml
 
 # Wait for deployments to be ready
@@ -121,6 +118,16 @@ echo "🔐 Kong Ingress Controller with HTTPS Setup:"
 echo "- Frontend: https://banv-app-dev.mindx.edu.vn (Secure access)"
 echo "- Backend API: https://banv-api-dev.mindx.edu.vn (Secure access)"
 echo "- Kong Admin: http://<KONG_IP>:8444/ (For management)"
+
+echo ""
+echo "🔐 Waiting for certificates to be issued..."
+echo "This may take a few minutes..."
+sleep 30
+
+echo ""
+echo "📋 Certificate Status:"
+kubectl get certificate -n $NAMESPACE
+kubectl get certificaterequest -n $NAMESPACE
 
 echo ""
 echo "🧪 Testing the deployment..."

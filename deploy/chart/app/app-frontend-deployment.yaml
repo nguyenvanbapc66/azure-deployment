@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: mindxacrbanv.azurecr.io/banv-projects-frontend:v1.5.0
+          image: mindxacrbanv.azurecr.io/banv-projects-frontend:v1.6.0
           ports:
             - containerPort: 80
           env:
