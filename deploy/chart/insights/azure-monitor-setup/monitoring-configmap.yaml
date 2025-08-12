@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: monitoring-config
+  namespace: azure-monitor
+data:
+  app-insights-name: "mindx-banv-app-insights"
+  resource-group: "mindx-individual-banv-rg"
+  cluster-name: "mindx_aks_banv"
+  log-analytics-workspace-id: "" # Will be populated by script
+  monitoring-enabled: "true"

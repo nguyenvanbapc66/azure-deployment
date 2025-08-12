@@ -1,0 +1,122 @@
+# Grafana configuration for MindX AKS
+replicas: 1
+
+persistence:
+  enabled: true
+  storageClassName: managed-csi
+  size: 10Gi
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+# Admin credentials
+adminUser: admin
+# adminPassword will be auto-generated and stored in secret
+
+# Grafana configuration
+grafana.ini:
+  server:
+    domain: localhost
+    root_url: http://localhost:3030
+  security:
+    admin_user: admin
+    # admin_password will be auto-generated
+  auth:
+    disable_login_form: false
+  auth.anonymous:
+    enabled: true
+    org_role: Viewer
+  dashboards:
+    default_home_dashboard_path: /var/lib/grafana/dashboards/default/kubernetes-cluster-overview.json
+
+# Data sources
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        url: http://prometheus-kube-prometheus-prometheus.prometheus-system.svc.cluster.local:9090
+        access: proxy
+        isDefault: true
+      - name: Azure Monitor
+        type: grafana-azure-monitor-datasource
+        access: proxy
+        jsonData:
+          subscriptionId: f244cdf7-5150-4b10-b3f2-d4bff23c5f45
+          resourceGroup: mindx-individual-banv-rg
+          cloudName: azuremonitor
+
+# Dashboard providers
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: "default"
+        orgId: 1
+        folder: ""
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+      - name: "kubernetes"
+        orgId: 1
+        folder: "Kubernetes"
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/kubernetes
+      - name: "applications"
+        orgId: 1
+        folder: "Applications"
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/applications
+
+# Pre-installed dashboards
+dashboards:
+  default:
+    kubernetes-cluster-overview:
+      gnetId: 7249
+      revision: 1
+      datasource: Prometheus
+    kubernetes-pod-overview:
+      gnetId: 6336
+      revision: 1
+      datasource: Prometheus
+  kubernetes:
+    kubernetes-nodes:
+      gnetId: 1860
+      revision: 27
+      datasource: Prometheus
+    kubernetes-persistent-volumes:
+      gnetId: 13646
+      revision: 2
+      datasource: Prometheus
+  applications:
+    kong-dashboard:
+      gnetId: 7424
+      revision: 6
+      datasource: Prometheus
+    nginx-ingress:
+      gnetId: 9614
+      revision: 1
+      datasource: Prometheus
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 80
+
+# Ingress configuration - disabled for port-forward access
+ingress:
+  enabled: false

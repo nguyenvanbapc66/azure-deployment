@@ -1,0 +1,149 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: application-alerts
+  namespace: prometheus-system
+  labels:
+    app: prometheus
+    release: prometheus
+spec:
+  groups:
+    - name: frontend-application
+      rules:
+        - alert: FrontendDown
+          expr: up{job="frontend-metrics"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            component: frontend
+            service: banv-app
+          annotations:
+            summary: "Frontend application is down"
+            description: "Frontend application has been down for more than 2 minutes"
+            dashboard: "https://grafana-banv-dev.mindx.edu.vn/d/frontend-dashboard"
+
+        - alert: FrontendHighErrorRate
+          expr: rate(http_requests_total{job="frontend-metrics",status=~"5.."}[5m]) / rate(http_requests_total{job="frontend-metrics"}[5m]) > 0.1
+          for: 5m
+          labels:
+            severity: warning
+            component: frontend
+            service: banv-app
+          annotations:
+            summary: "High error rate on frontend"
+            description: "Frontend error rate is {{ $value | humanizePercentage }}"
+
+        - alert: FrontendHighLatency
+          expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="frontend-metrics"}[5m])) > 2
+          for: 5m
+          labels:
+            severity: warning
+            component: frontend
+            service: banv-app
+          annotations:
+            summary: "High latency on frontend"
+            description: "Frontend 95th percentile latency is {{ $value }}s"
+
+        - alert: FrontendHighMemoryUsage
+          expr: nodejs_heap_size_used_bytes{job="frontend-metrics"} / nodejs_heap_size_total_bytes{job="frontend-metrics"} > 0.9
+          for: 5m
+          labels:
+            severity: warning
+            component: frontend
+            service: banv-app
+          annotations:
+            summary: "High memory usage on frontend"
+            description: "Frontend memory usage is {{ $value | humanizePercentage }}"
+
+    - name: backend-application
+      rules:
+        - alert: BackendDown
+          expr: up{job="backend-metrics"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            component: backend
+            service: banv-api
+          annotations:
+            summary: "Backend application is down"
+            description: "Backend application has been down for more than 2 minutes"
+            dashboard: "https://grafana-banv-dev.mindx.edu.vn/d/backend-dashboard"
+
+        - alert: BackendHighErrorRate
+          expr: rate(http_requests_total{job="backend-metrics",status=~"5.."}[5m]) / rate(http_requests_total{job="backend-metrics"}[5m]) > 0.1
+          for: 5m
+          labels:
+            severity: warning
+            component: backend
+            service: banv-api
+          annotations:
+            summary: "High error rate on backend"
+            description: "Backend error rate is {{ $value | humanizePercentage }}"
+
+        - alert: BackendHighLatency
+          expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="backend-metrics"}[5m])) > 5
+          for: 5m
+          labels:
+            severity: warning
+            component: backend
+            service: banv-api
+          annotations:
+            summary: "High latency on backend"
+            description: "Backend 95th percentile latency is {{ $value }}s"
+
+        - alert: BackendDatabaseConnectionsHigh
+          expr: database_connections_active{job="backend-metrics"} > 80
+          for: 5m
+          labels:
+            severity: warning
+            component: backend
+            service: banv-api
+          annotations:
+            summary: "High database connections"
+            description: "Backend has {{ $value }} active database connections"
+
+        - alert: OAuthFailureRate
+          expr: rate(oauth_requests_total{job="backend-metrics",status="failure"}[5m]) / rate(oauth_requests_total{job="backend-metrics"}[5m]) > 0.1
+          for: 5m
+          labels:
+            severity: warning
+            component: backend
+            service: oauth
+          annotations:
+            summary: "High OAuth failure rate"
+            description: "OAuth failure rate is {{ $value | humanizePercentage }}"
+
+    - name: kong-ingress
+      rules:
+        - alert: KongDown
+          expr: up{job="kong-servicemonitor"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            component: ingress
+            service: kong
+          annotations:
+            summary: "Kong Ingress Controller is down"
+            description: "Kong Ingress Controller has been down for more than 2 minutes"
+
+        - alert: KongHighErrorRate
+          expr: rate(kong_http_status{code=~"5.."}[5m]) / rate(kong_http_status[5m]) > 0.1
+          for: 5m
+          labels:
+            severity: warning
+            component: ingress
+            service: kong
+          annotations:
+            summary: "High error rate on Kong"
+            description: "Kong error rate is {{ $value | humanizePercentage }}"
+
+        - alert: KongHighLatency
+          expr: histogram_quantile(0.95, rate(kong_latency_bucket[5m])) > 10
+          for: 5m
+          labels:
+            severity: warning
+            component: ingress
+            service: kong
+          annotations:
+            summary: "High latency on Kong"
+            description: "Kong 95th percentile latency is {{ $value }}ms"

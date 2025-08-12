@@ -1,0 +1,95 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: alertmanager-config
+  namespace: prometheus-system
+type: Opaque
+stringData:
+  alertmanager.yml: |
+    global:
+      smtp_smarthost: 'smtp.gmail.com:587'
+      smtp_from: 'alerts@mindx.edu.vn'
+      smtp_auth_username: 'alerts@mindx.edu.vn'
+      smtp_auth_password: 'your-app-password'
+
+    route:
+      group_by: ['alertname', 'cluster', 'service']
+      group_wait: 10s
+      group_interval: 10s
+      repeat_interval: 12h
+      receiver: 'web.hook'
+      routes:
+      - match:
+          severity: critical
+        receiver: 'critical-alerts'
+        group_wait: 10s
+        repeat_interval: 5m
+      - match:
+          severity: warning
+        receiver: 'warning-alerts'
+        group_wait: 30s
+        repeat_interval: 30m
+      - match:
+          component: security
+        receiver: 'security-alerts'
+        group_wait: 5s
+        repeat_interval: 1h
+
+    receivers:
+    - name: 'web.hook'
+      webhook_configs:
+      - url: 'http://webhook-service.monitoring.svc.cluster.local:9093/webhook'
+
+    - name: 'critical-alerts'
+      email_configs:
+      - to: 'admin@mindx.edu.vn'
+        subject: '🚨 CRITICAL Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Component: {{ .Labels.component }}
+          Service: {{ .Labels.service }}
+          Dashboard: {{ .Annotations.dashboard }}
+          {{ end }}
+      slack_configs:
+      - api_url: 'https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK'
+        channel: '#alerts-critical'
+        title: '🚨 Critical Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}: {{ .Annotations.description }}{{ end }}'
+
+    - name: 'warning-alerts'
+      email_configs:
+      - to: 'devops@mindx.edu.vn'
+        subject: '⚠️  Warning Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Severity: {{ .Labels.severity }}
+          Component: {{ .Labels.component }}
+          Service: {{ .Labels.service }}
+          {{ end }}
+
+    - name: 'security-alerts'
+      email_configs:
+      - to: 'security@mindx.edu.vn'
+        subject: '🔒 Security Alert: {{ .GroupLabels.alertname }}'
+        body: |
+          {{ range .Alerts }}
+          Alert: {{ .Annotations.summary }}
+          Description: {{ .Annotations.description }}
+          Component: {{ .Labels.component }}
+          Dashboard: {{ .Annotations.dashboard }}
+          {{ end }}
+
+    inhibit_rules:
+    - source_match:
+        severity: 'critical'
+      target_match:
+        severity: 'warning'
+      equal: ['alertname', 'cluster', 'service']
+
+    templates:
+    - '/etc/alertmanager/templates/*.tmpl'

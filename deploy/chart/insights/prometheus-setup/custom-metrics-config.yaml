@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: custom-metrics-config
+  namespace: banv-projects
+data:
+  metrics-config.json: |
+    {
+      "frontend": {
+        "enabled": true,
+        "endpoint": "/metrics",
+        "port": 3000,
+        "metrics": [
+          "http_requests_total",
+          "http_request_duration_seconds",
+          "http_response_size_bytes",
+          "nodejs_heap_size_used_bytes",
+          "nodejs_heap_size_total_bytes",
+          "process_cpu_user_seconds_total",
+          "process_resident_memory_bytes"
+        ]
+      },
+      "backend": {
+        "enabled": true,
+        "endpoint": "/metrics",
+        "port": 9090,
+        "metrics": [
+          "http_requests_total",
+          "http_request_duration_seconds",
+          "http_response_size_bytes",
+          "nodejs_heap_size_used_bytes",
+          "nodejs_heap_size_total_bytes",
+          "process_cpu_user_seconds_total",
+          "process_resident_memory_bytes",
+          "database_connections_active",
+          "oauth_requests_total",
+          "session_count"
+        ]
+      }
+    }

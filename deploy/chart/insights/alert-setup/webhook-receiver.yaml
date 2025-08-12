@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webhook-receiver
+  namespace: azure-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webhook-receiver
+  template:
+    metadata:
+      labels:
+        app: webhook-receiver
+    spec:
+      containers:
+        - name: webhook-receiver
+          image: prom/alertmanager:latest
+          command: ["/bin/sh"]
+          args: ["-c", "while true; do echo 'Webhook receiver running'; sleep 3600; done"]
+          ports:
+            - containerPort: 9093
+          env:
+            - name: PORT
+              value: "9093"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webhook-service
+  namespace: azure-monitor
+spec:
+  selector:
+    app: webhook-receiver
+  ports:
+    - port: 9093
+      targetPort: 9093
+      protocol: TCP

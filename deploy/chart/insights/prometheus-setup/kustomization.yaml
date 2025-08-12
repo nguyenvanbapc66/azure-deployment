@@ -1,0 +1,22 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: prometheus-setup
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+resources:
+  - service-monitors.yaml
+  - metrics-services.yaml
+  - custom-metrics-config.yaml
+
+# Note: Helm values files are not included in kustomization
+# - prometheus-values.yaml (Helm values file)
+# - grafana-values.yaml (Helm values file)
+
+commonLabels:
+  monitoring.mindx.edu.vn/component: prometheus
+  app.kubernetes.io/part-of: monitoring-stack
+
+namespace: banv-projects

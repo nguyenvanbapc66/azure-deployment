@@ -15,19 +15,6 @@ function App() {
     console.log("API_URL:", API_URL);
     console.log("API_KEY:", API_KEY);
 
-    fetch(`${API_URL}`, {
-      headers: {
-        apikey: API_KEY || "",
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-      })
-      .catch((error) => {
-        console.error("API Error:", error);
-      });
     fetch(`${API_URL}/api/items`, {
       headers: {
         apikey: API_KEY || "",

@@ -1,0 +1,43 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: frontend-metrics-monitor
+  namespace: prometheus-system
+  labels:
+    app: frontend
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+      component: metrics
+  namespaceSelector:
+    matchNames:
+      - banv-projects
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: backend-metrics-monitor
+  namespace: prometheus-system
+  labels:
+    app: backend
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: backend
+      component: metrics
+  namespaceSelector:
+    matchNames:
+      - banv-projects
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s

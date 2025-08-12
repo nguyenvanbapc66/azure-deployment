@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: azure-monitor-setup
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+resources:
+  - monitoring-configmap.yaml
+  - app-insights-config.yaml
+  - fluent-bit-config.yaml
+
+commonLabels:
+  monitoring.mindx.edu.vn/component: azure-monitor
+  app.kubernetes.io/part-of: monitoring-stack
+
+namespace: banv-projects

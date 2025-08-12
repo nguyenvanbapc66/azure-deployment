@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: alert-setup
+  annotations:
+    config.kubernetes.io/local-config: "true"
+
+resources:
+  - infrastructure-alerts.yaml
+  - application-alerts.yaml
+  - alertmanager-config.yaml
+  - azure-alerts-config.yaml
+  - webhook-receiver.yaml
+
+commonLabels:
+  monitoring.mindx.edu.vn/component: alerts
+  app.kubernetes.io/part-of: monitoring-stack
+# Note: Different resources use different namespaces
+# - PrometheusRules and Alertmanager config go to prometheus-system
+# - Azure alerts config and webhook receiver go to azure-monitor

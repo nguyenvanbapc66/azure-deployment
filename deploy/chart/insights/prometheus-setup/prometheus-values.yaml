@@ -1,0 +1,85 @@
+# Prometheus configuration for MindX AKS
+prometheus:
+  prometheusSpec:
+    retention: 30d
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: managed-csi
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 50Gi
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 2Gi
+      requests:
+        cpu: 500m
+        memory: 1Gi
+
+# Enable monitoring of Kong Ingress Controller
+kubeApiServer:
+  enabled: true
+
+kubelet:
+  enabled: true
+  serviceMonitor:
+    metricRelabelings:
+      - sourceLabels: [__name__]
+        regex: "kubelet_(pod_worker_latency_microseconds|pod_start_latency_microseconds|cgroup_manager_latency_microseconds|pod_worker_start_latency_microseconds|pleg_relist_latency_microseconds|pleg_relist_interval_microseconds|runtime_operations|runtime_operations_latency_microseconds|runtime_operations_errors|eviction_stats_age_microseconds|device_plugin_registration_count|device_plugin_alloc_latency_microseconds|network_plugin_operations_latency_microseconds)"
+        action: drop
+
+kubeControllerManager:
+  enabled: false
+
+kubeScheduler:
+  enabled: false
+
+kubeProxy:
+  enabled: false
+
+kubeEtcd:
+  enabled: false
+
+# ServiceMonitor for Kong
+additionalServiceMonitors:
+  - name: kong-servicemonitor
+    selector:
+      matchLabels:
+        app.kubernetes.io/name: kong
+    endpoints:
+      - port: kong-admin
+        path: /metrics
+
+  # ServiceMonitor for cert-manager
+  - name: cert-manager-servicemonitor
+    selector:
+      matchLabels:
+        app.kubernetes.io/name: cert-manager
+    endpoints:
+      - port: http-metrics
+        path: /metrics
+
+alertmanager:
+  alertmanagerSpec:
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: managed-csi
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 10Gi
+
+grafana:
+  enabled: false # We'll install Grafana separately
+
+nodeExporter:
+  enabled: true
+
+prometheusOperator:
+  enabled: true
+
+kube-state-metrics:
+  enabled: true

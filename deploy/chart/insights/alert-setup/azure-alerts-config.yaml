@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: azure-alerts-config
+  namespace: azure-monitor
+data:
+  create-azure-alerts.sh: |
+    #!/bin/bash
+    # Script to create Azure Monitor alerts
+
+    RESOURCE_GROUP="mindx-individual-banv-rg"
+    AKS_CLUSTER_NAME="mindx_aks_banv"
+    APP_INSIGHTS_NAME="mindx-banv-app-insights"
+
+    # Get resource IDs
+    AKS_RESOURCE_ID=$(az aks show --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME --query id -o tsv)
+    APP_INSIGHTS_RESOURCE_ID=$(az monitor app-insights component show --app $APP_INSIGHTS_NAME --resource-group $RESOURCE_GROUP --query id -o tsv)
+
+    # Create action group
+    az monitor action-group create \
+      --resource-group $RESOURCE_GROUP \
+      --name "mindx-banv-alerts" \
+      --short-name "banv-alerts" \
+      --email admin admin@mindx.edu.vn \
+      --webhook alerts https://webhook.mindx.edu.vn/alerts
+
+    # AKS CPU alert
+    az monitor metrics alert create \
+      --name "AKS High CPU Usage" \
+      --resource-group $RESOURCE_GROUP \
+      --scopes $AKS_RESOURCE_ID \
+      --condition "avg node_cpu_usage_percentage > 80" \
+      --window-size 5m \
+      --evaluation-frequency 1m \
+      --action mindx-banv-alerts \
+      --severity 2 \
+      --description "AKS cluster has high CPU usage"
+
+    # AKS Memory alert
+    az monitor metrics alert create \
+      --name "AKS High Memory Usage" \
+      --resource-group $RESOURCE_GROUP \
+      --scopes $AKS_RESOURCE_ID \
+      --condition "avg node_memory_working_set_percentage > 85" \
+      --window-size 5m \
+      --evaluation-frequency 1m \
+      --action mindx-banv-alerts \
+      --severity 2 \
+      --description "AKS cluster has high memory usage"
+
+    # Application Insights availability alert
+    az monitor metrics alert create \
+      --name "Application Availability" \
+      --resource-group $RESOURCE_GROUP \
+      --scopes $APP_INSIGHTS_RESOURCE_ID \
+      --condition "avg availabilityResults/availabilityPercentage < 95" \
+      --window-size 5m \
+      --evaluation-frequency 1m \
+      --action mindx-banv-alerts \
+      --severity 1 \
+      --description "Application availability is below 95%"
+
+    # Application Insights response time alert
+    az monitor metrics alert create \
+      --name "High Response Time" \
+      --resource-group $RESOURCE_GROUP \
+      --scopes $APP_INSIGHTS_RESOURCE_ID \
+      --condition "avg requests/duration > 5000" \
+      --window-size 5m \
+      --evaluation-frequency 1m \
+      --action mindx-banv-alerts \
+      --severity 2 \
+      --description "Application response time is high"
+
+    echo "Azure Monitor alerts created successfully"
