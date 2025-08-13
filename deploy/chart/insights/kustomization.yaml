@@ -12,8 +12,4 @@ resources:
   - prometheus-setup/
   - alert-setup/
 
-commonLabels:
-  monitoring.mindx.edu.vn/component: insights
-  app.kubernetes.io/part-of: monitoring-stack
-
 namespace: banv-projects

@@ -15,8 +15,4 @@ resources:
 # - prometheus-values.yaml (Helm values file)
 # - grafana-values.yaml (Helm values file)
 
-commonLabels:
-  monitoring.mindx.edu.vn/component: prometheus
-  app.kubernetes.io/part-of: monitoring-stack
-
 namespace: banv-projects

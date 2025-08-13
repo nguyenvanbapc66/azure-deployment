@@ -223,7 +223,7 @@ trigger_certificate_requests() {
     echo "📜 Step 6: Triggering new certificate requests..."
     
     # Reapply ingress to trigger certificate creation
-    kubectl apply -f ./deploy/chart/kong-ingress/kong-ingress.yaml
+    kubectl apply -f ../chart/kong-ingress/kong-ingress.yaml
     
     echo "   ⏳ Waiting for certificate creation..."
     sleep 10

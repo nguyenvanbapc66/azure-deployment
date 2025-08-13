@@ -29,13 +29,13 @@ metadata:
     component: metrics
   annotations:
     prometheus.io/scrape: "true"
-    prometheus.io/port: "9090"
+    prometheus.io/port: "5000"
     prometheus.io/path: "/metrics"
 spec:
   selector:
     app: backend
   ports:
     - name: metrics
-      port: 9090
-      targetPort: 9090
+      port: 5000
+      targetPort: 5000
       protocol: TCP

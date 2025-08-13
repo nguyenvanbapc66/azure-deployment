@@ -1,0 +1,236 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: slo-burn-rate-alerts
+  namespace: prometheus-system
+  labels:
+    app: prometheus
+    release: prometheus
+spec:
+  groups:
+    - name: slo-burn-rate-rules
+      interval: 30s
+      rules:
+        # SLI Recording Rules
+        - record: sli:availability_1m
+          expr: avg_over_time(up{job=~".*-metrics"}[1m])
+
+        - record: sli:availability_5m
+          expr: avg_over_time(up{job=~".*-metrics"}[5m])
+
+        - record: sli:availability_30m
+          expr: avg_over_time(up{job=~".*-metrics"}[30m])
+
+        - record: sli:availability_1h
+          expr: avg_over_time(up{job=~".*-metrics"}[1h])
+
+        - record: sli:availability_6h
+          expr: avg_over_time(up{job=~".*-metrics"}[6h])
+
+        - record: sli:availability_24h
+          expr: avg_over_time(up{job=~".*-metrics"}[24h])
+
+        - record: sli:availability_3d
+          expr: avg_over_time(up{job=~".*-metrics"}[3d])
+
+        - record: sli:availability_30d
+          expr: avg_over_time(up{job=~".*-metrics"}[30d])
+
+        # Error Rate SLI Recording Rules
+        - record: sli:error_rate_1m
+          expr: |
+            (
+              rate(http_requests_total{job=~".*-metrics",status_code=~"5.."}[1m]) /
+              rate(http_requests_total{job=~".*-metrics"}[1m])
+            )
+
+        - record: sli:error_rate_5m
+          expr: |
+            (
+              rate(http_requests_total{job=~".*-metrics",status_code=~"5.."}[5m]) /
+              rate(http_requests_total{job=~".*-metrics"}[5m])
+            )
+
+        - record: sli:error_rate_30m
+          expr: |
+            (
+              rate(http_requests_total{job=~".*-metrics",status_code=~"5.."}[30m]) /
+              rate(http_requests_total{job=~".*-metrics"}[30m])
+            )
+
+        - record: sli:error_rate_1h
+          expr: |
+            (
+              rate(http_requests_total{job=~".*-metrics",status_code=~"5.."}[1h]) /
+              rate(http_requests_total{job=~".*-metrics"}[1h])
+            )
+
+        - record: sli:error_rate_6h
+          expr: |
+            (
+              rate(http_requests_total{job=~".*-metrics",status_code=~"5.."}[6h]) /
+              rate(http_requests_total{job=~".*-metrics"}[6h])
+            )
+
+        # Latency SLI Recording Rules
+        - record: sli:latency_p95_1m
+          expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~".*-metrics"}[1m]))
+
+        - record: sli:latency_p95_5m
+          expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~".*-metrics"}[5m]))
+
+        - record: sli:latency_p95_30m
+          expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~".*-metrics"}[30m]))
+
+        - record: sli:latency_p99_1m
+          expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=~".*-metrics"}[1m]))
+
+        - record: sli:latency_p99_5m
+          expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=~".*-metrics"}[5m]))
+
+    - name: slo-99.9-burn-rate-alerts
+      rules:
+        # 99.9% SLO (0.1% error budget)
+        # Page immediately: 2% burn rate over 1h AND 5% burn rate over 5m
+        - alert: SLO999BurnRateCritical
+          expr: |
+            (
+              (1 - sli:availability_1h) > (14.4 * 0.001)
+              and
+              (1 - sli:availability_5m) > (14.4 * 6 * 0.001)
+            )
+            or
+            (
+              sli:error_rate_1h > (14.4 * 0.001)
+              and
+              sli:error_rate_5m > (14.4 * 6 * 0.001)
+            )
+          for: 2m
+          labels:
+            severity: critical
+            slo: "99.9%"
+            burn_rate: "fast"
+          annotations:
+            summary: "99.9% SLO burn rate is critically high"
+            description: "Service {{ $labels.job }} is consuming error budget too fast (fast burn)"
+
+        # Page: 1% burn rate over 6h AND 2.5% burn rate over 30m
+        - alert: SLO999BurnRateHigh
+          expr: |
+            (
+              (1 - sli:availability_6h) > (6 * 0.001)
+              and
+              (1 - sli:availability_30m) > (6 * 3 * 0.001)
+            )
+            or
+            (
+              sli:error_rate_6h > (6 * 0.001)
+              and
+              sli:error_rate_30m > (6 * 3 * 0.001)
+            )
+          for: 15m
+          labels:
+            severity: critical
+            slo: "99.9%"
+            burn_rate: "medium"
+          annotations:
+            summary: "99.9% SLO burn rate is high"
+            description: "Service {{ $labels.job }} is consuming error budget too fast (medium burn)"
+
+    - name: slo-9999-burn-rate-alerts
+      rules:
+        # 99.99% SLO (0.01% error budget)
+        # Page immediately: 2% burn rate over 1h AND 5% burn rate over 5m
+        - alert: SLO9999BurnRateCritical
+          expr: |
+            (
+              (1 - sli:availability_1h) > (14.4 * 0.0001)
+              and
+              (1 - sli:availability_5m) > (14.4 * 6 * 0.0001)
+            )
+            or
+            (
+              sli:error_rate_1h > (14.4 * 0.0001)
+              and
+              sli:error_rate_5m > (14.4 * 6 * 0.0001)
+            )
+          for: 2m
+          labels:
+            severity: critical
+            slo: "99.99%"
+            burn_rate: "fast"
+          annotations:
+            summary: "99.99% SLO burn rate is critically high"
+            description: "Service {{ $labels.job }} is consuming error budget too fast (fast burn)"
+
+        # Page: 1% burn rate over 6h AND 2.5% burn rate over 30m
+        - alert: SLO9999BurnRateHigh
+          expr: |
+            (
+              (1 - sli:availability_6h) > (6 * 0.0001)
+              and
+              (1 - sli:availability_30m) > (6 * 3 * 0.0001)
+            )
+            or
+            (
+              sli:error_rate_6h > (6 * 0.0001)
+              and
+              sli:error_rate_30m > (6 * 3 * 0.0001)
+            )
+          for: 15m
+          labels:
+            severity: critical
+            slo: "99.99%"
+            burn_rate: "medium"
+          annotations:
+            summary: "99.99% SLO burn rate is high"
+            description: "Service {{ $labels.job }} is consuming error budget too fast (medium burn)"
+
+    - name: slo-9995-burn-rate-alerts
+      rules:
+        # 99.95% SLO (0.05% error budget)
+        # Page: 1% burn rate over 6h AND 2.5% burn rate over 30m
+        - alert: SLO9995BurnRateHigh
+          expr: |
+            (
+              (1 - sli:availability_6h) > (6 * 0.0005)
+              and
+              (1 - sli:availability_30m) > (6 * 3 * 0.0005)
+            )
+            or
+            (
+              sli:error_rate_6h > (6 * 0.0005)
+              and
+              sli:error_rate_30m > (6 * 3 * 0.0005)
+            )
+          for: 15m
+          labels:
+            severity: warning
+            slo: "99.95%"
+            burn_rate: "medium"
+          annotations:
+            summary: "99.95% SLO burn rate is high"
+            description: "Service {{ $labels.job }} is consuming error budget too fast"
+
+    - name: latency-slo-alerts
+      rules:
+        # Latency SLO Violations
+        - alert: LatencySLOViolation
+          expr: sli:latency_p95_5m > 2
+          for: 5m
+          labels:
+            severity: warning
+            slo_type: "latency"
+          annotations:
+            summary: "Latency SLO violation"
+            description: "Service {{ $labels.job }} P95 latency is {{ $value }}s, exceeding 2s SLO"
+
+        - alert: LatencySLOCritical
+          expr: sli:latency_p99_5m > 5
+          for: 2m
+          labels:
+            severity: critical
+            slo_type: "latency"
+          annotations:
+            summary: "Critical latency SLO violation"
+            description: "Service {{ $labels.job }} P99 latency is {{ $value }}s, exceeding 5s critical threshold"

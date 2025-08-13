@@ -1,7 +1,7 @@
 # Prometheus configuration for MindX AKS
 prometheus:
   prometheusSpec:
-    retention: 30d
+    retention: 7d
     storageSpec:
       volumeClaimTemplate:
         spec:
@@ -9,14 +9,14 @@ prometheus:
           accessModes: ["ReadWriteOnce"]
           resources:
             requests:
-              storage: 50Gi
+              storage: 10Gi
     resources:
       limits:
-        cpu: 1000m
-        memory: 2Gi
+        cpu: 100m
+        memory: 128Mi
       requests:
-        cpu: 500m
-        memory: 1Gi
+        cpu: 50m
+        memory: 64Mi
 
 # Enable monitoring of Kong Ingress Controller
 kubeApiServer:

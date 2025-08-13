@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: mindxacrbanv.azurecr.io/banv-projects-frontend:v1.8.0-monitoring
+          image: mindxacrbanv.azurecr.io/banv-projects-frontend:v1.16.0-monitoring
           ports:
             - containerPort: 80
           env:
@@ -29,6 +29,10 @@ spec:
                 secretKeyRef:
                   name: app-insights-secret
                   key: connection-string
+            - name: VITE_APPLICATION_INSIGHTS_CLOUD_ROLE
+              value: "banv-frontend-web"
+            - name: VITE_APPLICATION_INSIGHTS_CLOUD_ROLE_INSTANCE
+              value: "banv-frontend"
           resources:
             requests:
               memory: "64Mi"

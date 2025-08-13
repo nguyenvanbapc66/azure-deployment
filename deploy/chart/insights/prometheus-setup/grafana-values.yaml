@@ -81,6 +81,14 @@ dashboardProviders:
         editable: true
         options:
           path: /var/lib/grafana/dashboards/applications
+      - name: "infrastructure"
+        orgId: 1
+        folder: "Infrastructure"
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/infrastructure
 
 # Pre-installed dashboards
 dashboards:
@@ -93,16 +101,23 @@ dashboards:
       gnetId: 6336
       revision: 1
       datasource: Prometheus
+    sla-monitoring:
+      file: sla-dashboard.json
+      datasource: Prometheus
   kubernetes:
     kubernetes-nodes:
       gnetId: 1860
       revision: 27
       datasource: Prometheus
-    kubernetes-persistent-volumes:
-      gnetId: 13646
-      revision: 2
-      datasource: Prometheus
   applications:
+    backend-service-metrics:
+      gnetId: 6417
+      revision: 1
+      datasource: Prometheus
+    frontend-service-metrics:
+      gnetId: 10000
+      revision: 1
+      datasource: Prometheus
     kong-dashboard:
       gnetId: 7424
       revision: 6
@@ -110,6 +125,11 @@ dashboards:
     nginx-ingress:
       gnetId: 9614
       revision: 1
+      datasource: Prometheus
+  infrastructure:
+    kubernetes-persistent-volumes:
+      gnetId: 13646
+      revision: 2
       datasource: Prometheus
 
 # Service configuration

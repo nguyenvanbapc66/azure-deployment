@@ -1,12 +1,13 @@
-import { Router } from "express";
-import { createItem, getItems, getItemById, updateItem, deleteItem } from "../controllers/itemController";
+import express from "express";
+import { createItem, getItems, getItemAnalytics } from "../controllers/itemController";
 
-const router = Router();
+const router = express.Router();
 
-router.get("/", getItems);
-router.get("/:id", getItemById);
+// 🚀 NEW: Advanced Analytics Endpoint (must be before generic routes)
+router.get("/analytics", getItemAnalytics);
+
+// CRUD operations
 router.post("/", createItem);
-router.put("/:id", updateItem);
-router.delete("/:id", deleteItem);
+router.get("/", getItems);
 
 export default router;

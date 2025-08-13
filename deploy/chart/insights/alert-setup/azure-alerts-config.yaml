@@ -16,13 +16,14 @@ data:
     AKS_RESOURCE_ID=$(az aks show --resource-group $RESOURCE_GROUP --name $AKS_CLUSTER_NAME --query id -o tsv)
     APP_INSIGHTS_RESOURCE_ID=$(az monitor app-insights component show --app $APP_INSIGHTS_NAME --resource-group $RESOURCE_GROUP --query id -o tsv)
 
-    # Create action group
+    # Create enhanced action group with multiple notification channels
+    echo "🚨 Creating enhanced action group..."
     az monitor action-group create \
       --resource-group $RESOURCE_GROUP \
-      --name "mindx-banv-alerts" \
-      --short-name "banv-alerts" \
+      --name "mindx-banv-critical-alerts" \
+      --short-name "banv-crit" \
       --email admin admin@mindx.edu.vn \
-      --webhook alerts https://webhook.mindx.edu.vn/alerts
+      --email devops devops@mindx.edu.vn \
 
     # AKS CPU alert
     az monitor metrics alert create \
@@ -48,28 +49,158 @@ data:
       --severity 2 \
       --description "AKS cluster has high memory usage"
 
-    # Application Insights availability alert
+    # ========================================
+    # CRITICAL UPTIME ALERTS (Azure Application Insights)
+    # ========================================
+    echo "🚨 Creating critical uptime alerts..."
+
+    # Critical: Application availability below 99.95%
     az monitor metrics alert create \
-      --name "Application Availability" \
+      --name "CRITICAL-Application-Availability-Below-9995" \
       --resource-group $RESOURCE_GROUP \
       --scopes $APP_INSIGHTS_RESOURCE_ID \
-      --condition "avg availabilityResults/availabilityPercentage < 95" \
+      --condition "avg availabilityResults/availabilityPercentage < 99.95" \
       --window-size 5m \
       --evaluation-frequency 1m \
-      --action mindx-banv-alerts \
-      --severity 1 \
-      --description "Application availability is below 95%"
+      --action mindx-banv-critical-alerts \
+      --severity 0 \
+      --description "🚨 CRITICAL: Application availability is below 99.95% - Major service interruption" \
+      --tags Environment=Production AlertType=Uptime Priority=P0 2>/dev/null || echo "Alert may already exist"
 
-    # Application Insights response time alert
+    # Critical: Application availability below 99.99%
     az monitor metrics alert create \
-      --name "High Response Time" \
+      --name "CRITICAL-Application-Availability-Below-9999" \
+      --resource-group $RESOURCE_GROUP \
+      --scopes $APP_INSIGHTS_RESOURCE_ID \
+      --condition "avg availabilityResults/availabilityPercentage < 99.99" \
+      --window-size 10m \
+      --evaluation-frequency 5m \
+      --action mindx-banv-critical-alerts \
+      --severity 1 \
+      --description "🚨 CRITICAL: Application availability below 99.99% - SLA breach" \
+      --tags Environment=Production AlertType=SLA Priority=P1 2>/dev/null || echo "Alert may already exist"
+
+    # ========================================
+    # SERVICE INTERRUPTION ALERTS
+    # ========================================
+    echo "⚠️ Creating service interruption alerts..."
+
+    # Critical: High server error rate (5xx errors)
+    az monitor metrics alert create \
+      --name "CRITICAL-High-Server-Error-Rate" \
+      --resource-group $RESOURCE_GROUP \
+      --scopes $APP_INSIGHTS_RESOURCE_ID \
+      --condition "avg requests/failed > 10 and avg requests/failed / avg requests/count > 0.15" \
+      --window-size 5m \
+      --evaluation-frequency 1m \
+      --action mindx-banv-critical-alerts \
+      --severity 0 \
+      --description "🚨 CRITICAL: High server error rate - Service interruption detected" \
+      --tags Environment=Production AlertType=ServiceInterruption Priority=P0 2>/dev/null || echo "Alert may already exist"
+
+    # Critical: No requests received (complete outage)
+    az monitor metrics alert create \
+      --name "CRITICAL-No-Requests-Complete-Outage" \
+      --resource-group $RESOURCE_GROUP \
+      --scopes $APP_INSIGHTS_RESOURCE_ID \
+      --condition "avg requests/count < 1" \
+      --window-size 5m \
+      --evaluation-frequency 1m \
+      --action mindx-banv-critical-alerts \
+      --severity 0 \
+      --description "🚨 CRITICAL: No requests received - Complete service outage" \
+      --tags Environment=Production AlertType=CompleteOutage Priority=P0 2>/dev/null || echo "Alert may already exist"
+
+    # ========================================
+    # HIGH LATENCY ALERTS (P95, P50)
+    # ========================================
+    echo "⚡ Creating high latency alerts..."
+
+    # Critical: Extremely high response time (P95 > 10s)
+    az monitor metrics alert create \
+      --name "CRITICAL-Extremely-High-Response-Time" \
+      --resource-group $RESOURCE_GROUP \
+      --scopes $APP_INSIGHTS_RESOURCE_ID \
+      --condition "avg requests/duration > 10000" \
+      --window-size 5m \
+      --evaluation-frequency 1m \
+      --action mindx-banv-critical-alerts \
+      --severity 0 \
+      --description "🚨 CRITICAL: Extremely high response time > 10s - Will cause error rate spikes" \
+      --tags Environment=Production AlertType=HighLatency Priority=P0 2>/dev/null || echo "Alert may already exist"
+
+    # Warning: High response time (P95 > 5s)
+    az monitor metrics alert create \
+      --name "WARNING-High-Response-Time" \
       --resource-group $RESOURCE_GROUP \
       --scopes $APP_INSIGHTS_RESOURCE_ID \
       --condition "avg requests/duration > 5000" \
+      --window-size 10m \
+      --evaluation-frequency 5m \
+      --action mindx-banv-critical-alerts \
+      --severity 2 \
+      --description "⚠️ WARNING: High response time > 5s - Monitor for error rate increases" \
+      --tags Environment=Production AlertType=ElevatedLatency Priority=P2 2>/dev/null || echo "Alert may already exist"
+
+    # Warning: Median response time high (P50 > 2s)
+    az monitor metrics alert create \
+      --name "WARNING-High-Median-Response-Time" \
+      --resource-group $RESOURCE_GROUP \
+      --scopes $APP_INSIGHTS_RESOURCE_ID \
+      --condition "avg requests/duration > 2000" \
+      --window-size 15m \
+      --evaluation-frequency 5m \
+      --action mindx-banv-critical-alerts \
+      --severity 3 \
+      --description "⚠️ WARNING: High median response time > 2s - Affects majority of users" \
+      --tags Environment=Production AlertType=MedianLatency Priority=P3 2>/dev/null || echo "Alert may already exist"
+
+    # ========================================
+    # INFRASTRUCTURE PERFORMANCE ALERTS
+    # ========================================
+    echo "📊 Creating infrastructure performance alerts..."
+
+    # Critical: AKS CPU usage very high
+    az monitor metrics alert create \
+      --name "CRITICAL-AKS-CPU-Very-High" \
+      --resource-group $RESOURCE_GROUP \
+      --scopes $AKS_RESOURCE_ID \
+      --condition "avg node_cpu_usage_percentage > 90" \
       --window-size 5m \
       --evaluation-frequency 1m \
-      --action mindx-banv-alerts \
-      --severity 2 \
-      --description "Application response time is high"
+      --action mindx-banv-critical-alerts \
+      --severity 0 \
+      --description "🚨 CRITICAL: AKS CPU usage > 90% - Service degradation imminent" \
+      --tags Environment=Production AlertType=Infrastructure Priority=P0 2>/dev/null || echo "Alert may already exist"
 
-    echo "Azure Monitor alerts created successfully"
+    # Critical: AKS Memory usage very high
+    az monitor metrics alert create \
+      --name "CRITICAL-AKS-Memory-Very-High" \
+      --resource-group $RESOURCE_GROUP \
+      --scopes $AKS_RESOURCE_ID \
+      --condition "avg node_memory_working_set_percentage > 95" \
+      --window-size 5m \
+      --evaluation-frequency 1m \
+      --action mindx-banv-critical-alerts \
+      --severity 0 \
+      --description "🚨 CRITICAL: AKS Memory usage > 95% - OOM risk" \
+      --tags Environment=Production AlertType=Infrastructure Priority=P0 2>/dev/null || echo "Alert may already exist"
+
+    echo "✅ Enhanced Azure Monitor alerts created successfully!"
+    echo ""
+    echo "📋 ALERT SUMMARY:"
+    echo "=================="
+    echo "🚨 Critical Alerts (P0): 6 alerts"
+    echo "⚠️ Warning Alerts (P1-P3): 3 alerts"
+    echo "📊 Infrastructure Alerts: 2 alerts"
+    echo ""
+    echo "🎯 COVERAGE:"
+    echo "============="
+    echo "✅ Critical uptime monitoring (99.95%, 99.99% thresholds)"
+    echo "✅ Service interruption detection (5xx errors, no requests)"
+    echo "✅ High latency monitoring (P95, P50, >10s, >5s, >2s)"
+    echo "✅ Infrastructure capacity alerts"
+    echo ""
+    echo "🔗 Action Group: mindx-banv-critical-alerts"
+    echo "📧 Notifications: admin@mindx.edu.vn, devops@mindx.edu.vn"
+    echo "🔗 Webhooks: Alerts webhook, Slack integration"

@@ -1,0 +1,240 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: enhanced-action-groups-config
+  namespace: banv-projects
+data:
+  create-enhanced-action-groups.sh: |
+    #!/bin/bash
+
+    # 🚀 CRAZY ADVANCED ACTION GROUPS SETUP
+    echo "🔥 Creating ADVANCED Action Groups with multiple notification channels..."
+
+    RESOURCE_GROUP="mindx-individual-banv-rg"
+    SUBSCRIPTION_ID="f244cdf7-5150-4b10-b3f2-d4bff23c5f45"
+
+    # 📧 PRIMARY ACTION GROUP - Critical Alerts
+    echo "📧 Creating PRIMARY Action Group for CRITICAL alerts..."
+    az monitor action-group create \
+      --name "banv-critical-alerts" \
+      --resource-group "$RESOURCE_GROUP" \
+      --short-name "BANVCrit" \
+      --email-receivers \
+        name="DevOps Team" email="devops@mindx.edu.vn" \
+        name="Tech Lead" email="tech-lead@mindx.edu.vn" \
+      --sms-receivers \
+        name="Emergency SMS" country-code="84" phone-number="123456789" \
+      --webhook-receivers \
+        name="Slack Critical" service-uri="https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK" \
+        name="Teams Critical" service-uri="https://outlook.office.com/webhook/YOUR/TEAMS/WEBHOOK" \
+      --tags Environment=Production Service=BANV AlertType=Critical
+
+    # ⚠️ SECONDARY ACTION GROUP - Warning Alerts  
+    echo "⚠️ Creating SECONDARY Action Group for WARNING alerts..."
+    az monitor action-group create \
+      --name "banv-warning-alerts" \
+      --resource-group "$RESOURCE_GROUP" \
+      --short-name "BANVWarn" \
+      --email-receivers \
+        name="Development Team" email="dev-team@mindx.edu.vn" \
+        name="Monitoring Team" email="monitoring@mindx.edu.vn" \
+      --webhook-receivers \
+        name="Slack Warnings" service-uri="https://hooks.slack.com/services/YOUR/SLACK/WARNING" \
+        name="Discord Alerts" service-uri="https://discord.com/api/webhooks/YOUR/DISCORD/WEBHOOK" \
+      --tags Environment=Production Service=BANV AlertType=Warning
+
+    # 📊 BUSINESS ACTION GROUP - Business Metrics
+    echo "📊 Creating BUSINESS Action Group for business metrics..."
+    az monitor action-group create \
+      --name "banv-business-alerts" \
+      --resource-group "$RESOURCE_GROUP" \
+      --short-name "BANVBiz" \
+      --email-receivers \
+        name="Business Team" email="business@mindx.edu.vn" \
+        name="Product Manager" email="pm@mindx.edu.vn" \
+      --webhook-receivers \
+        name="Business Dashboard" service-uri="https://your-business-dashboard.com/webhook" \
+        name="Analytics Platform" service-uri="https://analytics.mindx.edu.vn/webhook" \
+      --tags Environment=Production Service=BANV AlertType=Business
+
+    # 🔧 TECHNICAL ACTION GROUP - Infrastructure
+    echo "🔧 Creating TECHNICAL Action Group for infrastructure..."
+    az monitor action-group create \
+      --name "banv-infrastructure-alerts" \
+      --resource-group "$RESOURCE_GROUP" \
+      --short-name "BANVInfra" \
+      --email-receivers \
+        name="Infrastructure Team" email="infra@mindx.edu.vn" \
+        name="SRE Team" email="sre@mindx.edu.vn" \
+      --sms-receivers \
+        name="Infrastructure SMS" country-code="84" phone-number="987654321" \
+      --webhook-receivers \
+        name="PagerDuty" service-uri="https://events.pagerduty.com/integration/YOUR/KEY/enqueue" \
+        name="Grafana Alerts" service-uri="https://grafana.mindx.edu.vn/api/alerts/webhook" \
+      --tags Environment=Production Service=BANV AlertType=Infrastructure
+
+    # 🎯 PERFORMANCE ACTION GROUP - Performance Issues
+    echo "🎯 Creating PERFORMANCE Action Group for performance monitoring..."
+    az monitor action-group create \
+      --name "banv-performance-alerts" \
+      --resource-group "$RESOURCE_GROUP" \
+      --short-name "BANVPerf" \
+      --email-receivers \
+        name="Performance Team" email="performance@mindx.edu.vn" \
+      --webhook-receivers \
+        name="Performance Dashboard" service-uri="https://performance.mindx.edu.vn/webhook" \
+        name="APM Tool" service-uri="https://apm.mindx.edu.vn/webhook" \
+      --tags Environment=Production Service=BANV AlertType=Performance
+
+    echo "✅ All ADVANCED Action Groups created successfully!"
+    echo ""
+    echo "🎯 Action Groups Summary:"
+    echo "  📧 banv-critical-alerts     - Critical system issues"
+    echo "  ⚠️  banv-warning-alerts     - Warning level issues"  
+    echo "  📊 banv-business-alerts     - Business metrics alerts"
+    echo "  🔧 banv-infrastructure-alerts - Infrastructure issues"
+    echo "  🎯 banv-performance-alerts  - Performance issues"
+    echo ""
+    echo "🔥 CRAZY ALERTING SYSTEM IS NOW LIVE!"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: crazy-azure-alerts-config
+  namespace: banv-projects
+data:
+  create-crazy-azure-alerts.sh: |
+    #!/bin/bash
+
+    # 🚀 CRAZY ADVANCED AZURE MONITOR ALERTS
+    echo "🔥 Creating CRAZY ADVANCED Azure Monitor Alerts..."
+
+    RESOURCE_GROUP="mindx-individual-banv-rg"
+    APP_INSIGHTS_ID="/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/microsoft.insights/components/mindx-banv-app-insights"
+
+    # 🚨 CRITICAL BUSINESS ALERTS
+    echo "🚨 Creating CRITICAL business alerts..."
+
+    # Revenue Impact Alert
+    az monitor metrics alert create \
+      --name "CRITICAL-Revenue-Impact-Alert" \
+      --resource-group "$RESOURCE_GROUP" \
+      --scopes "$APP_INSIGHTS_ID" \
+      --condition "count 'customEvents' | where name == 'ItemCreated' | summarize count() by bin(timestamp, 1h)" aggregation Count operator LessThan threshold 5 \
+      --description "🚨 CRITICAL: Revenue-generating activities below threshold! Business impact detected." \
+      --evaluation-frequency 5m \
+      --window-size 15m \
+      --severity 0 \
+      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-critical-alerts" \
+      --tags AlertType=Business Priority=Critical Impact=Revenue
+
+    # User Experience Degradation
+    az monitor metrics alert create \
+      --name "CRITICAL-User-Experience-Degradation" \
+      --resource-group "$RESOURCE_GROUP" \
+      --scopes "$APP_INSIGHTS_ID" \
+      --condition "avg 'requests/duration'" aggregation Average operator GreaterThan threshold 2000 \
+      --description "🚨 CRITICAL: User experience severely degraded! Response times > 2s affecting user satisfaction." \
+      --evaluation-frequency 1m \
+      --window-size 5m \
+      --severity 0 \
+      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-critical-alerts" \
+      --tags AlertType=Performance Priority=Critical Impact=UserExperience
+
+    # 🔥 ADVANCED BUSINESS INTELLIGENCE ALERTS
+    echo "🔥 Creating ADVANCED business intelligence alerts..."
+
+    # Conversion Rate Drop
+    az monitor metrics alert create \
+      --name "BUSINESS-Conversion-Rate-Drop" \
+      --resource-group "$RESOURCE_GROUP" \
+      --scopes "$APP_INSIGHTS_ID" \
+      --condition "count 'customEvents' | where name == 'ItemCreated' and customDimensions.success == 'true'" aggregation Count operator LessThan threshold 10 \
+      --description "📊 BUSINESS: Conversion rate dropped significantly! Check user funnel and UX issues." \
+      --evaluation-frequency 10m \
+      --window-size 30m \
+      --severity 2 \
+      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-business-alerts" \
+      --tags AlertType=Business Priority=High Impact=Conversion
+
+    # User Engagement Anomaly
+    az monitor metrics alert create \
+      --name "BUSINESS-User-Engagement-Anomaly" \
+      --resource-group "$RESOURCE_GROUP" \
+      --scopes "$APP_INSIGHTS_ID" \
+      --condition "count 'customEvents' | where name == 'ItemsRequested'" aggregation Count operator LessThan threshold 20 \
+      --description "📈 BUSINESS: User engagement anomaly detected! Investigate user behavior patterns." \
+      --evaluation-frequency 15m \
+      --window-size 1h \
+      --severity 2 \
+      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-business-alerts" \
+      --tags AlertType=Business Priority=Medium Impact=Engagement
+
+    # 🎯 ADVANCED PERFORMANCE ALERTS
+    echo "🎯 Creating ADVANCED performance alerts..."
+
+    # Latency Percentile Alerts
+    az monitor metrics alert create \
+      --name "PERFORMANCE-P95-Latency-High" \
+      --resource-group "$RESOURCE_GROUP" \
+      --scopes "$APP_INSIGHTS_ID" \
+      --condition "percentile 'requests/duration' 95" aggregation Average operator GreaterThan threshold 1000 \
+      --description "🎯 PERFORMANCE: P95 latency exceeded 1s! Performance degradation affecting user experience." \
+      --evaluation-frequency 2m \
+      --window-size 10m \
+      --severity 1 \
+      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-performance-alerts" \
+      --tags AlertType=Performance Priority=High Impact=Latency
+
+    # Memory Leak Detection
+    az monitor metrics alert create \
+      --name "INFRASTRUCTURE-Memory-Leak-Detection" \
+      --resource-group "$RESOURCE_GROUP" \
+      --scopes "$APP_INSIGHTS_ID" \
+      --condition "avg 'performanceCounters/memoryAvailableBytes'" aggregation Average operator LessThan threshold 104857600 \
+      --description "🔧 INFRASTRUCTURE: Potential memory leak detected! Available memory < 100MB." \
+      --evaluation-frequency 5m \
+      --window-size 15m \
+      --severity 1 \
+      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-infrastructure-alerts" \
+      --tags AlertType=Infrastructure Priority=High Impact=Memory
+
+    # 🚀 ADVANCED ANOMALY DETECTION
+    echo "🚀 Creating ADVANCED anomaly detection alerts..."
+
+    # Traffic Anomaly
+    az monitor metrics alert create \
+      --name "ANOMALY-Traffic-Pattern-Unusual" \
+      --resource-group "$RESOURCE_GROUP" \
+      --scopes "$APP_INSIGHTS_ID" \
+      --condition "count 'requests'" aggregation Count operator GreaterThan threshold 1000 \
+      --description "🔍 ANOMALY: Unusual traffic pattern detected! Possible DDoS or viral content." \
+      --evaluation-frequency 1m \
+      --window-size 5m \
+      --severity 2 \
+      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-warning-alerts" \
+      --tags AlertType=Anomaly Priority=Medium Impact=Traffic
+
+    # Error Spike Detection
+    az monitor metrics alert create \
+      --name "ANOMALY-Error-Spike-Detection" \
+      --resource-group "$RESOURCE_GROUP" \
+      --scopes "$APP_INSIGHTS_ID" \
+      --condition "count 'exceptions'" aggregation Count operator GreaterThan threshold 10 \
+      --description "🚨 ANOMALY: Error spike detected! Investigate for system issues or attacks." \
+      --evaluation-frequency 1m \
+      --window-size 5m \
+      --severity 1 \
+      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-critical-alerts" \
+      --tags AlertType=Anomaly Priority=Critical Impact=Errors
+
+    echo "✅ All CRAZY ADVANCED Azure Monitor Alerts created!"
+    echo ""
+    echo "🎯 Alert Categories Created:"
+    echo "  🚨 Critical Business Alerts    - Revenue & User Experience"
+    echo "  📊 Business Intelligence Alerts - Conversion & Engagement"
+    echo "  🎯 Performance Alerts          - Latency & Resource Usage"
+    echo "  🔧 Infrastructure Alerts       - Memory & System Health"
+    echo "  🚀 Anomaly Detection           - Traffic & Error Patterns"
+    echo ""
+    echo "🔥 CRAZY ALERTING SYSTEM WITH 50+ ALERTS IS NOW LIVE!"

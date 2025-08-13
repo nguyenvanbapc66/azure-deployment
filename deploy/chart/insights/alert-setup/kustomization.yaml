@@ -12,10 +12,8 @@ resources:
   - alertmanager-config.yaml
   - azure-alerts-config.yaml
   - webhook-receiver.yaml
-
-commonLabels:
-  monitoring.mindx.edu.vn/component: alerts
-  app.kubernetes.io/part-of: monitoring-stack
+  - slo-burn-rate-alerts.yaml
+  - enhanced-action-groups.yaml
 # Note: Different resources use different namespaces
 # - PrometheusRules and Alertmanager config go to prometheus-system
 # - Azure alerts config and webhook receiver go to azure-monitor

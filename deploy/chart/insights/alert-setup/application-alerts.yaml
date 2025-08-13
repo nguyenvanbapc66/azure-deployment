@@ -10,39 +10,100 @@ spec:
   groups:
     - name: frontend-application
       rules:
+        # CRITICAL UPTIME ALERTS
         - alert: FrontendDown
           expr: up{job="frontend-metrics"} == 0
           for: 2m
           labels:
             severity: critical
+            priority: P0
             component: frontend
             service: banv-app
+            alert_type: uptime
           annotations:
-            summary: "Frontend application is down"
-            description: "Frontend application has been down for more than 2 minutes"
-            dashboard: "https://grafana-banv-dev.mindx.edu.vn/d/frontend-dashboard"
+            summary: "🚨 CRITICAL: Frontend application completely down"
+            description: "Frontend application has been completely unreachable for over 2 minutes. Users cannot access the application."
 
+        # SERVICE INTERRUPTION ALERTS
         - alert: FrontendHighErrorRate
-          expr: rate(http_requests_total{job="frontend-metrics",status=~"5.."}[5m]) / rate(http_requests_total{job="frontend-metrics"}[5m]) > 0.1
+          expr: rate(http_requests_total{job="frontend-metrics",status=~"5.."}[5m]) / rate(http_requests_total{job="frontend-metrics"}[5m]) > 0.15
+          for: 3m
+          labels:
+            severity: critical
+            priority: P1
+            component: frontend
+            service: banv-app
+            alert_type: service_interruption
+          annotations:
+            summary: "🚨 CRITICAL: High error rate on frontend - Service interruption"
+            description: "Frontend error rate is {{ $value | humanizePercentage }} indicating major service issues."
+
+        - alert: FrontendPartialServiceInterruption
+          expr: (rate(http_requests_total{job="frontend-metrics",status=~"5.."}[5m]) / rate(http_requests_total{job="frontend-metrics"}[5m]) > 0.05) and (rate(http_requests_total{job="frontend-metrics",status=~"5.."}[5m]) / rate(http_requests_total{job="frontend-metrics"}[5m]) <= 0.15)
           for: 5m
           labels:
             severity: warning
+            priority: P2
             component: frontend
             service: banv-app
+            alert_type: partial_interruption
           annotations:
-            summary: "High error rate on frontend"
-            description: "Frontend error rate is {{ $value | humanizePercentage }}"
+            summary: "⚠️ PARTIAL: Elevated error rate on frontend"
+            description: "Frontend error rate is {{ $value | humanizePercentage }} indicating partial service degradation."
 
-        - alert: FrontendHighLatency
+        # HIGH LATENCY ALERTS (P95, P50)
+        - alert: FrontendCriticalHighLatencyP95
+          expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="frontend-metrics"}[5m])) > 5
+          for: 3m
+          labels:
+            severity: critical
+            priority: P1
+            component: frontend
+            service: banv-app
+            alert_type: latency
+          annotations:
+            summary: "🚨 CRITICAL: Extremely high P95 latency on frontend"
+            description: "Frontend P95 latency is {{ $value }}s which is critically high. This will cause user frustration and timeouts."
+
+        - alert: FrontendHighLatencyP95
           expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="frontend-metrics"}[5m])) > 2
           for: 5m
           labels:
             severity: warning
+            priority: P2
             component: frontend
             service: banv-app
+            alert_type: latency
           annotations:
-            summary: "High latency on frontend"
-            description: "Frontend 95th percentile latency is {{ $value }}s"
+            summary: "⚠️ WARNING: High P95 latency on frontend"
+            description: "Frontend P95 latency is {{ $value }}s which affects user experience."
+
+        - alert: FrontendHighLatencyP50
+          expr: histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job="frontend-metrics"}[5m])) > 1
+          for: 5m
+          labels:
+            severity: warning
+            priority: P2
+            component: frontend
+            service: banv-app
+            alert_type: latency
+          annotations:
+            summary: "⚠️ WARNING: High P50 (median) latency on frontend"
+            description: "Frontend P50 latency is {{ $value }}s which affects the majority of users."
+
+        # SUSTAINED ISSUES
+        - alert: FrontendSustainedHigh404Rate
+          expr: rate(http_requests_total{job="frontend-metrics",status="404"}[15m]) / rate(http_requests_total{job="frontend-metrics"}[15m]) > 0.3
+          for: 10m
+          labels:
+            severity: critical
+            priority: P1
+            component: frontend
+            service: banv-app
+            alert_type: sustained_degradation
+          annotations:
+            summary: "🚨 CRITICAL: Sustained high 404 error rate on frontend"
+            description: "404 error rate has been {{ $value | humanizePercentage }} for over 10 minutes indicating routing issues."
 
         - alert: FrontendHighMemoryUsage
           expr: nodejs_heap_size_used_bytes{job="frontend-metrics"} / nodejs_heap_size_total_bytes{job="frontend-metrics"} > 0.9
@@ -57,39 +118,127 @@ spec:
 
     - name: backend-application
       rules:
+        # CRITICAL UPTIME ALERTS
         - alert: BackendDown
           expr: up{job="backend-metrics"} == 0
           for: 2m
           labels:
             severity: critical
+            priority: P0
             component: backend
             service: banv-api
+            alert_type: uptime
           annotations:
-            summary: "Backend application is down"
-            description: "Backend application has been down for more than 2 minutes"
-            dashboard: "https://grafana-banv-dev.mindx.edu.vn/d/backend-dashboard"
+            summary: "🚨 CRITICAL: Backend API completely down"
+            description: "Backend API has been completely unreachable for over 2 minutes. All API functionality is affected."
 
+        # SERVICE INTERRUPTION ALERTS
         - alert: BackendHighErrorRate
-          expr: rate(http_requests_total{job="backend-metrics",status=~"5.."}[5m]) / rate(http_requests_total{job="backend-metrics"}[5m]) > 0.1
+          expr: rate(http_requests_total{job="backend-metrics",status=~"5.."}[5m]) / rate(http_requests_total{job="backend-metrics"}[5m]) > 0.15
+          for: 3m
+          labels:
+            severity: critical
+            priority: P1
+            component: backend
+            service: banv-api
+            alert_type: service_interruption
+          annotations:
+            summary: "🚨 CRITICAL: High error rate on backend - Service interruption"
+            description: "Backend error rate is {{ $value | humanizePercentage }} indicating major service issues."
+
+        - alert: BackendPartialServiceInterruption
+          expr: (rate(http_requests_total{job="backend-metrics",status=~"5.."}[5m]) / rate(http_requests_total{job="backend-metrics"}[5m]) > 0.05) and (rate(http_requests_total{job="backend-metrics",status=~"5.."}[5m]) / rate(http_requests_total{job="backend-metrics"}[5m]) <= 0.15)
           for: 5m
           labels:
             severity: warning
+            priority: P2
             component: backend
             service: banv-api
+            alert_type: partial_interruption
           annotations:
-            summary: "High error rate on backend"
-            description: "Backend error rate is {{ $value | humanizePercentage }}"
+            summary: "⚠️ PARTIAL: Elevated error rate on backend"
+            description: "Backend error rate is {{ $value | humanizePercentage }} indicating partial service degradation."
 
-        - alert: BackendHighLatency
+        # ENDPOINT-SPECIFIC INTERRUPTION ALERTS
+        - alert: BackendHealthEndpointDown
+          expr: (rate(http_requests_total{job="backend-metrics",route="/health",status=~"5.."}[5m]) / rate(http_requests_total{job="backend-metrics",route="/health"}[5m]) > 0.8) and (rate(http_requests_total{job="backend-metrics",route="/api/items",status!~"5.."}[5m]) > 0)
+          for: 3m
+          labels:
+            severity: warning
+            priority: P2
+            component: backend
+            service: banv-api
+            alert_type: partial_interruption
+          annotations:
+            summary: "⚠️ PARTIAL: Health endpoint failing while other endpoints work"
+            description: "Health endpoint has {{ $value | humanizePercentage }} error rate while other endpoints are functional."
+
+        - alert: BackendAPIEndpointDown
+          expr: (rate(http_requests_total{job="backend-metrics",route="/api/items",status=~"5.."}[5m]) / rate(http_requests_total{job="backend-metrics",route="/api/items"}[5m]) > 0.8) and (rate(http_requests_total{job="backend-metrics",route="/health",status!~"5.."}[5m]) > 0)
+          for: 3m
+          labels:
+            severity: warning
+            priority: P2
+            component: backend
+            service: banv-api
+            alert_type: partial_interruption
+          annotations:
+            summary: "⚠️ PARTIAL: API items endpoint failing while other endpoints work"
+            description: "API items endpoint has {{ $value | humanizePercentage }} error rate while other endpoints are functional."
+
+        # HIGH LATENCY ALERTS (P95, P50)
+        - alert: BackendCriticalHighLatencyP95
+          expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="backend-metrics"}[5m])) > 10
+          for: 3m
+          labels:
+            severity: critical
+            priority: P1
+            component: backend
+            service: banv-api
+            alert_type: latency
+          annotations:
+            summary: "🚨 CRITICAL: Extremely high P95 latency on backend"
+            description: "Backend P95 latency is {{ $value }}s which is critically high. This will cause frontend timeouts and high error rates."
+
+        - alert: BackendHighLatencyP95
           expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="backend-metrics"}[5m])) > 5
           for: 5m
           labels:
             severity: warning
+            priority: P2
             component: backend
             service: banv-api
+            alert_type: latency
           annotations:
-            summary: "High latency on backend"
-            description: "Backend 95th percentile latency is {{ $value }}s"
+            summary: "⚠️ WARNING: High P95 latency on backend"
+            description: "Backend P95 latency is {{ $value }}s. API responses are slow which may cause frontend timeouts."
+
+        - alert: BackendHighLatencyP50
+          expr: histogram_quantile(0.50, rate(http_request_duration_seconds_bucket{job="backend-metrics"}[5m])) > 3
+          for: 5m
+          labels:
+            severity: warning
+            priority: P2
+            component: backend
+            service: banv-api
+            alert_type: latency
+          annotations:
+            summary: "⚠️ WARNING: High P50 (median) latency on backend"
+            description: "Backend P50 latency is {{ $value }}s which affects the majority of API calls."
+
+        # LATENCY-ERROR CORRELATION
+        - alert: BackendLatencyInducedErrors
+          expr: (histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="backend-metrics"}[5m])) > 8) and (rate(http_requests_total{job="backend-metrics",status=~"5.."}[5m]) / rate(http_requests_total{job="backend-metrics"}[5m]) > 0.1)
+          for: 3m
+          labels:
+            severity: critical
+            priority: P1
+            component: backend
+            service: banv-api
+            alert_type: latency_error_correlation
+          annotations:
+            summary: "🚨 CRITICAL: High latency is causing high error rate on backend"
+            description: "Backend P95 latency is {{ $value }}s and error rate is elevated. Latency is directly causing service failures."
 
         - alert: BackendDatabaseConnectionsHigh
           expr: database_connections_active{job="backend-metrics"} > 80
@@ -102,16 +251,32 @@ spec:
             summary: "High database connections"
             description: "Backend has {{ $value }} active database connections"
 
+        # OAUTH & AUTHENTICATION ALERTS
+        - alert: OAuthCriticalFailureRate
+          expr: rate(oauth_requests_total{job="backend-metrics",status="failure"}[5m]) / rate(oauth_requests_total{job="backend-metrics"}[5m]) > 0.3
+          for: 3m
+          labels:
+            severity: critical
+            priority: P1
+            component: backend
+            service: oauth
+            alert_type: service_interruption
+          annotations:
+            summary: "🚨 CRITICAL: High OAuth failure rate - Authentication service interruption"
+            description: "OAuth failure rate is {{ $value | humanizePercentage }}. Users cannot authenticate."
+
         - alert: OAuthFailureRate
           expr: rate(oauth_requests_total{job="backend-metrics",status="failure"}[5m]) / rate(oauth_requests_total{job="backend-metrics"}[5m]) > 0.1
           for: 5m
           labels:
             severity: warning
+            priority: P2
             component: backend
             service: oauth
+            alert_type: partial_interruption
           annotations:
-            summary: "High OAuth failure rate"
-            description: "OAuth failure rate is {{ $value | humanizePercentage }}"
+            summary: "⚠️ PARTIAL: Elevated OAuth failure rate"
+            description: "OAuth failure rate is {{ $value | humanizePercentage }}. Some users may have trouble logging in."
 
     - name: kong-ingress
       rules:
@@ -147,3 +312,92 @@ spec:
           annotations:
             summary: "High latency on Kong"
             description: "Kong 95th percentile latency is {{ $value }}ms"
+
+    # ========================================
+    # COMPREHENSIVE SLA & UPTIME MONITORING
+    # ========================================
+    - name: sla-uptime-monitoring
+      rules:
+        # CRITICAL: Complete service outage
+        - alert: CriticalServiceCompleteOutage
+          expr: (up{job="backend-metrics"} == 0 and up{job="frontend-metrics"} == 0)
+          for: 1m
+          labels:
+            severity: critical
+            priority: P0
+            component: all-services
+            service: banv-app
+            alert_type: uptime
+          annotations:
+            summary: "🚨 CRITICAL: Complete service outage - All services down"
+            description: "Both frontend and backend services are completely down. This is a complete service interruption affecting all users."
+
+        # CRITICAL: Service uptime below 99.95%
+        - alert: CriticalUptimeBelowThreshold
+          expr: (sum(rate(http_requests_total{status!~"5.."}[5m])) / sum(rate(http_requests_total[5m]))) < 0.9995
+          for: 5m
+          labels:
+            severity: critical
+            priority: P1
+            component: application
+            service: banv-app
+            alert_type: uptime
+          annotations:
+            summary: "🚨 CRITICAL: Service uptime below 99.95%"
+            description: "Service uptime is {{ $value | humanizePercentage }} which is below the critical 99.95% threshold."
+
+        # CRITICAL: SLA breach - Below 99.99% uptime
+        - alert: CriticalSLABreach9999Percent
+          expr: (sum(rate(http_requests_total{status!~"5.."}[1h])) / sum(rate(http_requests_total[1h]))) < 0.9999
+          for: 5m
+          labels:
+            severity: critical
+            priority: P0
+            component: application
+            service: banv-app
+            alert_type: sla_breach
+          annotations:
+            summary: "🚨 CRITICAL: SLA breach - Uptime below 99.99%"
+            description: "Service uptime is {{ $value | humanizePercentage }} over the last hour, breaching 99.99% SLA."
+
+        # WARNING: SLA watch - Below 99.98% uptime
+        - alert: WarningSLAWatch9998Percent
+          expr: (sum(rate(http_requests_total{status!~"5.."}[1h])) / sum(rate(http_requests_total[1h]))) < 0.9998
+          for: 5m
+          labels:
+            severity: warning
+            priority: P2
+            component: application
+            service: banv-app
+            alert_type: sla_watch
+          annotations:
+            summary: "⚠️ WARNING: Uptime below 99.98% - SLA watch"
+            description: "Service uptime is {{ $value | humanizePercentage }} over the last hour, approaching SLA limits."
+
+        # CRITICAL: Extremely high 404 error rate (service interruption indicator)
+        - alert: CriticalHigh404ErrorRate
+          expr: rate(http_requests_total{status="404"}[5m]) / rate(http_requests_total[5m]) > 0.5
+          for: 3m
+          labels:
+            severity: critical
+            priority: P1
+            component: application
+            service: banv-app
+            alert_type: service_interruption
+          annotations:
+            summary: "🚨 CRITICAL: Extremely high 404 error rate - Service interruption"
+            description: "404 error rate is {{ $value | humanizePercentage }} over 5 minutes. This indicates major service interruption or routing issues."
+
+        # WARNING: Gradual performance degradation
+        - alert: WarningGradualPerformanceDegradation
+          expr: (histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[30m])) / histogram_quantile(0.95, rate(http_request_duration_seconds_bucket[30m] offset 1h))) > 1.5
+          for: 10m
+          labels:
+            severity: warning
+            priority: P2
+            component: application
+            service: banv-app
+            alert_type: gradual_degradation
+          annotations:
+            summary: "⚠️ WARNING: Gradual performance degradation detected"
+            description: "P95 latency has increased by {{ $value | humanizePercentage }} compared to 1 hour ago, indicating gradual degradation."

@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: mindxacrbanv.azurecr.io/banv-projects-backend:v1.8.0-monitoring
+          image: mindxacrbanv.azurecr.io/banv-projects-backend:v1.16.0-monitoring
           ports:
             - containerPort: 5000
           env:
@@ -39,6 +39,14 @@ spec:
                 secretKeyRef:
                   name: app-insights-secret
                   key: connection-string
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: APPLICATION_INSIGHTS_CLOUD_ROLE
+              value: "banv-backend-api"
+            - name: APPLICATION_INSIGHTS_CLOUD_ROLE_INSTANCE
+              value: "banv-backend"
           resources:
             requests:
               memory: "128Mi"

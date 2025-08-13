@@ -1,0 +1,232 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "Service Level Monitoring - SLA Dashboard",
+    "tags": ["sla", "sli", "monitoring", "banv"],
+    "style": "dark",
+    "timezone": "browser",
+    "refresh": "30s",
+    "schemaVersion": 27,
+    "version": 1,
+    "panels": [
+      {
+        "id": 1,
+        "title": "Service Uptime - SLA Tracking",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "avg_over_time(up{job=~\".*-metrics\"}[24h]) * 100",
+            "legendFormat": "{{job}} - 24h Uptime %",
+            "refId": "A"
+          },
+          {
+            "expr": "avg_over_time(up{job=~\".*-metrics\"}[7d]) * 100",
+            "legendFormat": "{{job}} - 7d Uptime %",
+            "refId": "B"
+          },
+          {
+            "expr": "avg_over_time(up{job=~\".*-metrics\"}[30d]) * 100",
+            "legendFormat": "{{job}} - 30d Uptime %",
+            "refId": "C"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 95,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 95 },
+                { "color": "green", "value": 99 }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+      },
+      {
+        "id": 2,
+        "title": "Service Latency - P95 Response Time",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job=~\".*-metrics\"}[5m]))",
+            "legendFormat": "{{job}} - P95 Latency",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job=~\".*-metrics\"}[5m]))",
+            "legendFormat": "{{job}} - P99 Latency",
+            "refId": "B"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "s",
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 5 }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+      },
+      {
+        "id": 3,
+        "title": "Error Rate - Per Service",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=~\".*-metrics\",status_code=~\"5..\"}[5m]) / rate(http_requests_total{job=~\".*-metrics\"}[5m]) * 100",
+            "legendFormat": "{{job}} - Error Rate %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "max": 10,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 5 }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+      },
+      {
+        "id": 4,
+        "title": "Traffic - Requests Per Second",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "rate(http_requests_total{job=~\".*-metrics\"}[5m])",
+            "legendFormat": "{{job}} - RPS",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqps"
+          }
+        },
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+      },
+      {
+        "id": 5,
+        "title": "Infrastructure Capacity - CPU Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "100 - (avg by (instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100)",
+            "legendFormat": "{{instance}} - CPU %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 }
+      },
+      {
+        "id": 6,
+        "title": "Infrastructure Capacity - Memory Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
+            "legendFormat": "{{instance}} - Memory %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 }
+      },
+      {
+        "id": 7,
+        "title": "Infrastructure Capacity - Disk Usage",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "(1 - (node_filesystem_avail_bytes{fstype!=\"tmpfs\"} / node_filesystem_size_bytes{fstype!=\"tmpfs\"})) * 100",
+            "legendFormat": "{{instance}}:{{mountpoint}} - Disk %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 }
+      },
+      {
+        "id": 8,
+        "title": "SLA Burn Rate - Error Budget Consumption",
+        "type": "timeseries",
+        "targets": [
+          {
+            "expr": "(\n  (\n    1 - avg_over_time(up{job=~\".*-metrics\"}[1h])\n  ) + (\n    rate(http_requests_total{job=~\".*-metrics\",status_code=~\"5..\"}[1h]) / \n    rate(http_requests_total{job=~\".*-metrics\"}[1h])\n  )\n) * 100",
+            "legendFormat": "{{job}} - Error Budget Burn Rate %",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 2 },
+                { "color": "red", "value": 10 }
+              ]
+            }
+          }
+        },
+        "gridPos": { "h": 8, "w": 24, "x": 0, "y": 24 }
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    }
+  }
+}

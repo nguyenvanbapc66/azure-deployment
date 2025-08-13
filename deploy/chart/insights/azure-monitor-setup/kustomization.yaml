@@ -11,8 +11,4 @@ resources:
   - app-insights-config.yaml
   - fluent-bit-config.yaml
 
-commonLabels:
-  monitoring.mindx.edu.vn/component: azure-monitor
-  app.kubernetes.io/part-of: monitoring-stack
-
 namespace: banv-projects
