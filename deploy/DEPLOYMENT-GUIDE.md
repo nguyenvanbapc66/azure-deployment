@@ -40,7 +40,6 @@ Instead of running 4 confusing scripts in the wrong order, use **ONE SCRIPT**:
 - ✅ Builds frontend with monitoring integration
 - ✅ Builds backend with monitoring integration
 - ✅ Pushes to Azure Container Registry
-- ✅ Version: `v1.10.0-monitoring`
 
 ### **📊 STEP 2: Setup Complete Monitoring Stack**
 

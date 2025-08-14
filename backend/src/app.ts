@@ -36,8 +36,9 @@ import cors from "cors";
 import session from "express-session";
 import { register, collectDefaultMetrics, Counter, Histogram, Gauge } from "prom-client";
 
-import { itemRoutes, oauthRoutes } from "./routes";
-import { errorHandler, notFoundHandler } from "./middlewares";
+import { itemRoutes, oauthRoutes, userRoutes } from "./routes";
+import { errorHandler, notFoundHandler, requestLogger, healthCheckLogger, errorRequestLogger } from "./middlewares";
+import { logger } from "./utils";
 
 // Initialize Prometheus metrics
 collectDefaultMetrics();
@@ -57,6 +58,12 @@ const httpRequestDuration = new Histogram({
 });
 
 const app = express();
+
+// Health check logger (before request logger to avoid noise)
+app.use(healthCheckLogger);
+
+// Main request logging middleware
+app.use(requestLogger);
 
 // Metrics middleware
 app.use((req, res, next) => {
@@ -105,6 +112,19 @@ if ((global as any).advancedTelemetryMiddleware) {
   app.use((global as any).advancedTelemetryMiddleware);
 }
 
+// Log application startup
+logger.app.info("Backend application starting", {
+  nodeEnv: process.env.NODE_ENV || "development",
+  version: process.env.npm_package_version || "1.0.0",
+  timestamp: new Date().toISOString(),
+  features: {
+    applicationInsights: !!process.env.APPLICATIONINSIGHTS_CONNECTION_STRING,
+    logging: true,
+    cors: true,
+    sessions: true,
+  },
+});
+
 // Health check endpoint for /health
 app.get("/health", (_, res) => {
   res.json({
@@ -135,7 +155,11 @@ app.get("/ready", (_, res) => {
 
 // Routes
 app.use("/api/items", itemRoutes);
+app.use("/api/user", userRoutes); // New user routes
 app.use("/oauth", oauthRoutes);
+
+// Error logging middleware (before error handlers)
+app.use(errorRequestLogger);
 
 // Global error handler (should be after routes)
 app.use(errorHandler);

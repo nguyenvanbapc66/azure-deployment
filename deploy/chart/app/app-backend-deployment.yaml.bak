@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: mindxacrbanv.azurecr.io/banv-projects-backend:v1.16.0-monitoring
+          image: mindxacrbanv.azurecr.io/banv-projects-backend:v1.17.0-monitoring
           ports:
             - containerPort: 5000
           env:

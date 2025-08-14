@@ -17,7 +17,7 @@ fi
 # Configuration
 REGISTRY="mindxacrbanv.azurecr.io"
 NAMESPACE="banv-projects"
-VERSION_TAG="v1.16.0-monitoring"
+VERSION_TAG="v1.17.0-monitoring"
 RESOURCE_GROUP="mindx-individual-banv-rg"
 AKS_CLUSTER_NAME="mindx_aks_banv"
 
