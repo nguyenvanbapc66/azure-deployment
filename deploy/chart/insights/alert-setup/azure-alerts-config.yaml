@@ -22,8 +22,7 @@ data:
       --resource-group $RESOURCE_GROUP \
       --name "mindx-banv-critical-alerts" \
       --short-name "banv-crit" \
-      --email admin admin@mindx.edu.vn \
-      --email devops devops@mindx.edu.vn \
+      --email devops banv@mindx.com.vn \
 
     # AKS CPU alert
     az monitor metrics alert create \

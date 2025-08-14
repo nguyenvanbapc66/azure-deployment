@@ -7,234 +7,223 @@ data:
   create-enhanced-action-groups.sh: |
     #!/bin/bash
 
-    # 🚀 CRAZY ADVANCED ACTION GROUPS SETUP
-    echo "🔥 Creating ADVANCED Action Groups with multiple notification channels..."
+    # 🚀 ENHANCED ACTION GROUPS WITH AZURE MOBILE APP NOTIFICATIONS
+    echo "🔥 Creating ENHANCED Action Groups with Azure Mobile App push notifications..."
 
     RESOURCE_GROUP="mindx-individual-banv-rg"
     SUBSCRIPTION_ID="f244cdf7-5150-4b10-b3f2-d4bff23c5f45"
 
-    # 📧 PRIMARY ACTION GROUP - Critical Alerts
-    echo "📧 Creating PRIMARY Action Group for CRITICAL alerts..."
+    # 📱 CRITICAL ACTION GROUP - Mobile App + Email + Webhooks (P0 Priority)
+    echo "📱 Creating CRITICAL Action Group with Azure Mobile App notifications..."
     az monitor action-group create \
       --name "banv-critical-alerts" \
       --resource-group "$RESOURCE_GROUP" \
       --short-name "BANVCrit" \
-      --email-receivers \
-        name="DevOps Team" email="devops@mindx.edu.vn" \
-        name="Tech Lead" email="tech-lead@mindx.edu.vn" \
-      --sms-receivers \
-        name="Emergency SMS" country-code="84" phone-number="123456789" \
-      --webhook-receivers \
-        name="Slack Critical" service-uri="https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK" \
-        name="Teams Critical" service-uri="https://outlook.office.com/webhook/YOUR/TEAMS/WEBHOOK" \
-      --tags Environment=Production Service=BANV AlertType=Critical
+      --action email "BANV-Primary" "banv@mindx.com.vn" \
+      --action azureapppush "Mobile-Critical-Alerts" "banv@mindx.com.vn" \
+      --tags Environment=Production Service=BANV AlertType=Critical Priority=P0 MobileEnabled=true
 
-    # ⚠️ SECONDARY ACTION GROUP - Warning Alerts  
-    echo "⚠️ Creating SECONDARY Action Group for WARNING alerts..."
+    # ⚡ HIGH PRIORITY ACTION GROUP - Mobile App + Email (P1 Priority)  
+    echo "⚡ Creating HIGH PRIORITY Action Group with Azure Mobile App notifications..."
+    az monitor action-group create \
+      --name "banv-high-priority-alerts" \
+      --resource-group "$RESOURCE_GROUP" \
+      --short-name "BANVHigh" \
+      --action email "BANV-Primary" "banv@mindx.com.vn" \
+      --action azureapppush "Mobile-High-Priority" "banv@mindx.com.vn" \
+      --tags Environment=Production Service=BANV AlertType=HighPriority Priority=P1 MobileEnabled=true
+
+    # ⚠️ WARNING ACTION GROUP - Email + Webhooks Only (No Mobile - P2/P3 Priority)  
+    echo "⚠️ Creating WARNING Action Group (Email only - no mobile notifications)..."
     az monitor action-group create \
       --name "banv-warning-alerts" \
       --resource-group "$RESOURCE_GROUP" \
       --short-name "BANVWarn" \
-      --email-receivers \
-        name="Development Team" email="dev-team@mindx.edu.vn" \
-        name="Monitoring Team" email="monitoring@mindx.edu.vn" \
-      --webhook-receivers \
-        name="Slack Warnings" service-uri="https://hooks.slack.com/services/YOUR/SLACK/WARNING" \
-        name="Discord Alerts" service-uri="https://discord.com/api/webhooks/YOUR/DISCORD/WEBHOOK" \
-      --tags Environment=Production Service=BANV AlertType=Warning
+      --action email "BANV-Primary" "banv@mindx.com.vn" \
+      --tags Environment=Production Service=BANV AlertType=Warning Priority=P2P3 MobileEnabled=false
 
-    # 📊 BUSINESS ACTION GROUP - Business Metrics
-    echo "📊 Creating BUSINESS Action Group for business metrics..."
+    # 📊 BUSINESS ACTION GROUP - Email Only (No Mobile)
+    echo "📊 Creating BUSINESS Action Group (Email only - business metrics)..."
     az monitor action-group create \
       --name "banv-business-alerts" \
       --resource-group "$RESOURCE_GROUP" \
       --short-name "BANVBiz" \
-      --email-receivers \
-        name="Business Team" email="business@mindx.edu.vn" \
-        name="Product Manager" email="pm@mindx.edu.vn" \
-      --webhook-receivers \
-        name="Business Dashboard" service-uri="https://your-business-dashboard.com/webhook" \
-        name="Analytics Platform" service-uri="https://analytics.mindx.edu.vn/webhook" \
-      --tags Environment=Production Service=BANV AlertType=Business
+      --action email "BANV-Primary" "banv@mindx.com.vn" \
+      --tags Environment=Production Service=BANV AlertType=Business Priority=P3 MobileEnabled=false
 
-    # 🔧 TECHNICAL ACTION GROUP - Infrastructure
-    echo "🔧 Creating TECHNICAL Action Group for infrastructure..."
+    # 🔧 INFRASTRUCTURE ACTION GROUP - Email Only (No Mobile for Infrastructure)
+    echo "🔧 Creating INFRASTRUCTURE Action Group (Email only)..."
     az monitor action-group create \
       --name "banv-infrastructure-alerts" \
       --resource-group "$RESOURCE_GROUP" \
       --short-name "BANVInfra" \
-      --email-receivers \
-        name="Infrastructure Team" email="infra@mindx.edu.vn" \
-        name="SRE Team" email="sre@mindx.edu.vn" \
-      --sms-receivers \
-        name="Infrastructure SMS" country-code="84" phone-number="987654321" \
-      --webhook-receivers \
-        name="PagerDuty" service-uri="https://events.pagerduty.com/integration/YOUR/KEY/enqueue" \
-        name="Grafana Alerts" service-uri="https://grafana.mindx.edu.vn/api/alerts/webhook" \
-      --tags Environment=Production Service=BANV AlertType=Infrastructure
+      --action email "BANV-Primary" "banv@mindx.com.vn" \
+      --tags Environment=Production Service=BANV AlertType=Infrastructure Priority=P2 MobileEnabled=false
 
-    # 🎯 PERFORMANCE ACTION GROUP - Performance Issues
-    echo "🎯 Creating PERFORMANCE Action Group for performance monitoring..."
+    # 🎯 PERFORMANCE ACTION GROUP - High Priority Gets Mobile  
+    echo "🎯 Creating PERFORMANCE Action Group (Mobile for critical performance issues)..."
     az monitor action-group create \
       --name "banv-performance-alerts" \
       --resource-group "$RESOURCE_GROUP" \
       --short-name "BANVPerf" \
-      --email-receivers \
-        name="Performance Team" email="performance@mindx.edu.vn" \
-      --webhook-receivers \
-        name="Performance Dashboard" service-uri="https://performance.mindx.edu.vn/webhook" \
-        name="APM Tool" service-uri="https://apm.mindx.edu.vn/webhook" \
-      --tags Environment=Production Service=BANV AlertType=Performance
+      --action email "BANV-Primary" "banv@mindx.com.vn" \
+      --action azureapppush "Mobile-Performance-Critical" "banv@mindx.com.vn" \
+      --tags Environment=Production Service=BANV AlertType=Performance Priority=P1 MobileEnabled=true
 
-    echo "✅ All ADVANCED Action Groups created successfully!"
+    echo ""
+    echo "📱 AZURE MOBILE APP NOTIFICATION SUMMARY:"
+    echo "==========================================="
+    echo "📧 Email Notifications: banv@mindx.com.vn (Your Outlook)"
+    echo "📱 Mobile Notifications: Azure Mobile App (Your Microsoft Account)"
+    echo ""
+    echo "✅ CRITICAL ALERTS (P0)    → 📱 Mobile App + 📧 Outlook"
+    echo "✅ HIGH PRIORITY (P1)      → 📱 Mobile App + 📧 Outlook"  
+    echo "✅ PERFORMANCE CRITICAL    → 📱 Mobile App + 📧 Outlook"
+    echo "📧 WARNING (P2)           → 📧 Outlook Only"
+    echo "📧 BUSINESS (P3)          → 📧 Outlook Only"
+    echo "📧 INFRASTRUCTURE (P2)    → 📧 Outlook Only"
     echo ""
     echo "🎯 Action Groups Summary:"
-    echo "  📧 banv-critical-alerts     - Critical system issues"
-    echo "  ⚠️  banv-warning-alerts     - Warning level issues"  
-    echo "  📊 banv-business-alerts     - Business metrics alerts"
-    echo "  🔧 banv-infrastructure-alerts - Infrastructure issues"
-    echo "  🎯 banv-performance-alerts  - Performance issues"
+    echo "  📱 banv-critical-alerts      - Critical issues (MOBILE + EMAIL)"
+    echo "  📱 banv-high-priority-alerts - High priority (MOBILE + EMAIL)"
+    echo "  📱 banv-performance-alerts   - Critical performance (MOBILE + EMAIL)"
+    echo "  📧 banv-warning-alerts       - Warning level (EMAIL only)"  
+    echo "  📧 banv-business-alerts      - Business metrics (EMAIL only)"
+    echo "  📧 banv-infrastructure-alerts - Infrastructure (EMAIL only)"
     echo ""
-    echo "🔥 CRAZY ALERTING SYSTEM IS NOW LIVE!"
+    echo "🔥 CLEAN AZURE MOBILE APP + OUTLOOK ALERTING SYSTEM IS NOW LIVE!"
+    echo "📱 Mobile App + 📧 Outlook Email - No Slack distractions!"
 ---
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: crazy-azure-alerts-config
+  name: logging-based-azure-alerts-config
   namespace: banv-projects
 data:
-  create-crazy-azure-alerts.sh: |
+  create-logging-azure-alerts.sh: |
     #!/bin/bash
 
-    # 🚀 CRAZY ADVANCED AZURE MONITOR ALERTS
-    echo "🔥 Creating CRAZY ADVANCED Azure Monitor Alerts..."
+    # 🚀 LOGGING-BASED AZURE MONITOR ALERTS WITH MOBILE NOTIFICATIONS
+    echo "🔥 Creating Azure Monitor Alerts based on your new logging system..."
 
     RESOURCE_GROUP="mindx-individual-banv-rg"
     APP_INSIGHTS_ID="/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/microsoft.insights/components/mindx-banv-app-insights"
 
-    # 🚨 CRITICAL BUSINESS ALERTS
-    echo "🚨 Creating CRITICAL business alerts..."
+    # 📱 CRITICAL ALERTS (Mobile Notifications Enabled)
+    echo "📱 Creating CRITICAL logging-based alerts with mobile notifications..."
 
-    # Revenue Impact Alert
-    az monitor metrics alert create \
-      --name "CRITICAL-Revenue-Impact-Alert" \
+    # CRITICAL: High Error Rate from Request Logs (Mobile Alert)
+    az monitor scheduled-query create \
+      --name "CRITICAL-High-Request-Error-Rate-Mobile" \
       --resource-group "$RESOURCE_GROUP" \
       --scopes "$APP_INSIGHTS_ID" \
-      --condition "count 'customEvents' | where name == 'ItemCreated' | summarize count() by bin(timestamp, 1h)" aggregation Count operator LessThan threshold 5 \
-      --description "🚨 CRITICAL: Revenue-generating activities below threshold! Business impact detected." \
-      --evaluation-frequency 5m \
-      --window-size 15m \
+      --condition "count 'ErrorQuery' >= 1" \
+      --condition-query ErrorQuery="requests | where timestamp > ago(5m) | where success == false | summarize ErrorRate = (count() * 100.0) / toscalar(requests | where timestamp > ago(5m) | count()) | where ErrorRate > 15" \
+      --evaluation-frequency PT1M \
+      --window-size PT5M \
       --severity 0 \
-      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-critical-alerts" \
-      --tags AlertType=Business Priority=Critical Impact=Revenue
+      --description "🚨 CRITICAL MOBILE ALERT: Request error rate > 15% detected in Application Insights - Service degradation!" \
+      --action-groups "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-critical-alerts"
 
-    # User Experience Degradation
-    az monitor metrics alert create \
-      --name "CRITICAL-User-Experience-Degradation" \
+    # CRITICAL: Security Events Detection (Mobile Alert)
+    az monitor scheduled-query create \
+      --name "CRITICAL-Security-Events-Mobile" \
       --resource-group "$RESOURCE_GROUP" \
       --scopes "$APP_INSIGHTS_ID" \
-      --condition "avg 'requests/duration'" aggregation Average operator GreaterThan threshold 2000 \
-      --description "🚨 CRITICAL: User experience severely degraded! Response times > 2s affecting user satisfaction." \
-      --evaluation-frequency 1m \
-      --window-size 5m \
+      --condition "count 'SecurityQuery' >= 1" \
+      --condition-query SecurityQuery="customEvents | where timestamp > ago(10m) | where name == 'SecurityEvent' | where customDimensions.severity == 'critical' | summarize SecurityIncidents = count() | where SecurityIncidents > 0" \
+      --evaluation-frequency PT1M \
+      --window-size PT10M \
       --severity 0 \
-      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-critical-alerts" \
-      --tags AlertType=Performance Priority=Critical Impact=UserExperience
+      --description "🚨 CRITICAL MOBILE ALERT: Security incidents detected! Unauthorized access attempts or critical security events occurred." \
+      --action-groups "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-critical-alerts"
 
-    # 🔥 ADVANCED BUSINESS INTELLIGENCE ALERTS
-    echo "🔥 Creating ADVANCED business intelligence alerts..."
-
-    # Conversion Rate Drop
-    az monitor metrics alert create \
-      --name "BUSINESS-Conversion-Rate-Drop" \
+    # CRITICAL: Application Exceptions Spike (Mobile Alert)
+    az monitor scheduled-query create \
+      --name "CRITICAL-Application-Exceptions-Mobile" \
       --resource-group "$RESOURCE_GROUP" \
       --scopes "$APP_INSIGHTS_ID" \
-      --condition "count 'customEvents' | where name == 'ItemCreated' and customDimensions.success == 'true'" aggregation Count operator LessThan threshold 10 \
-      --description "📊 BUSINESS: Conversion rate dropped significantly! Check user funnel and UX issues." \
-      --evaluation-frequency 10m \
-      --window-size 30m \
-      --severity 2 \
-      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-business-alerts" \
-      --tags AlertType=Business Priority=High Impact=Conversion
+      --condition "count 'ExceptionQuery' >= 1" \
+      --condition-query ExceptionQuery="exceptions | where timestamp > ago(5m) | where customDimensions.logType == 'application' | summarize ExceptionCount = count() | where ExceptionCount > 10" \
+      --evaluation-frequency PT1M \
+      --window-size PT5M \
+      --severity 0 \
+      --description "🚨 CRITICAL MOBILE ALERT: Application exception spike detected! More than 10 exceptions in 5 minutes indicates serious application issues." \
+      --action-groups "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-critical-alerts"
 
-    # User Engagement Anomaly
-    az monitor metrics alert create \
-      --name "BUSINESS-User-Engagement-Anomaly" \
+    # ⚡ HIGH PRIORITY ALERTS (Mobile Notifications Enabled)
+    echo "⚡ Creating HIGH PRIORITY logging-based alerts with mobile notifications..."
+
+    # HIGH: Slow Request Performance (Mobile Alert)
+    az monitor scheduled-query create \
+      --name "HIGH-Slow-Request-Performance-Mobile" \
       --resource-group "$RESOURCE_GROUP" \
       --scopes "$APP_INSIGHTS_ID" \
-      --condition "count 'customEvents' | where name == 'ItemsRequested'" aggregation Count operator LessThan threshold 20 \
-      --description "📈 BUSINESS: User engagement anomaly detected! Investigate user behavior patterns." \
-      --evaluation-frequency 15m \
-      --window-size 1h \
-      --severity 2 \
-      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-business-alerts" \
-      --tags AlertType=Business Priority=Medium Impact=Engagement
-
-    # 🎯 ADVANCED PERFORMANCE ALERTS
-    echo "🎯 Creating ADVANCED performance alerts..."
-
-    # Latency Percentile Alerts
-    az monitor metrics alert create \
-      --name "PERFORMANCE-P95-Latency-High" \
-      --resource-group "$RESOURCE_GROUP" \
-      --scopes "$APP_INSIGHTS_ID" \
-      --condition "percentile 'requests/duration' 95" aggregation Average operator GreaterThan threshold 1000 \
-      --description "🎯 PERFORMANCE: P95 latency exceeded 1s! Performance degradation affecting user experience." \
-      --evaluation-frequency 2m \
-      --window-size 10m \
+      --condition "count 'SlowQuery' >= 1" \
+      --condition-query SlowQuery="requests | where timestamp > ago(10m) | where duration > 2000 | summarize SlowRequests = count() | where SlowRequests > 5" \
+      --evaluation-frequency PT2M \
+      --window-size PT10M \
       --severity 1 \
-      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-performance-alerts" \
-      --tags AlertType=Performance Priority=High Impact=Latency
+      --description "⚡ HIGH PRIORITY MOBILE ALERT: Multiple slow requests detected (>2s response time). User experience degradation!" \
+      --action-groups "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-high-priority-alerts"
 
-    # Memory Leak Detection
-    az monitor metrics alert create \
-      --name "INFRASTRUCTURE-Memory-Leak-Detection" \
+    # HIGH: Request Volume Drop (Mobile Alert)
+    az monitor scheduled-query create \
+      --name "HIGH-Request-Volume-Drop-Mobile" \
       --resource-group "$RESOURCE_GROUP" \
       --scopes "$APP_INSIGHTS_ID" \
-      --condition "avg 'performanceCounters/memoryAvailableBytes'" aggregation Average operator LessThan threshold 104857600 \
-      --description "🔧 INFRASTRUCTURE: Potential memory leak detected! Available memory < 100MB." \
-      --evaluation-frequency 5m \
-      --window-size 15m \
+      --condition "count 'VolumeQuery' >= 1" \
+      --condition-query VolumeQuery="requests | where timestamp > ago(10m) | summarize RequestCount = count() | where RequestCount < 5" \
+      --evaluation-frequency PT2M \
+      --window-size PT10M \
       --severity 1 \
-      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-infrastructure-alerts" \
-      --tags AlertType=Infrastructure Priority=High Impact=Memory
+      --description "⚡ HIGH PRIORITY MOBILE ALERT: Significant drop in request volume detected. Possible service outage or access issues!" \
+      --action-groups "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-high-priority-alerts"
 
-    # 🚀 ADVANCED ANOMALY DETECTION
-    echo "🚀 Creating ADVANCED anomaly detection alerts..."
+    # ⚠️ WARNING ALERTS (Email Only - No Mobile)
+    echo "⚠️ Creating WARNING logging-based alerts (Email only)..."
 
-    # Traffic Anomaly
-    az monitor metrics alert create \
-      --name "ANOMALY-Traffic-Pattern-Unusual" \
+    # WARNING: Increased Error Traces (Email Only)
+    az monitor scheduled-query create \
+      --name "WARNING-Increased-Error-Traces" \
       --resource-group "$RESOURCE_GROUP" \
       --scopes "$APP_INSIGHTS_ID" \
-      --condition "count 'requests'" aggregation Count operator GreaterThan threshold 1000 \
-      --description "🔍 ANOMALY: Unusual traffic pattern detected! Possible DDoS or viral content." \
-      --evaluation-frequency 1m \
-      --window-size 5m \
+      --condition "count 'TraceQuery' >= 1" \
+      --condition-query TraceQuery="traces | where timestamp > ago(15m) | where severityLevel >= 3 | where customDimensions.logType == 'application' | summarize ErrorTraces = count() | where ErrorTraces > 5" \
+      --evaluation-frequency PT5M \
+      --window-size PT15M \
       --severity 2 \
-      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-warning-alerts" \
-      --tags AlertType=Anomaly Priority=Medium Impact=Traffic
+      --description "⚠️ WARNING: Increased error traces detected in application logs. Monitor for potential issues." \
+      --action-groups "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-warning-alerts"
 
-    # Error Spike Detection
-    az monitor metrics alert create \
-      --name "ANOMALY-Error-Spike-Detection" \
+    # WARNING: Failed Login Attempts (Email Only)
+    az monitor scheduled-query create \
+      --name "WARNING-Failed-Login-Attempts" \
       --resource-group "$RESOURCE_GROUP" \
       --scopes "$APP_INSIGHTS_ID" \
-      --condition "count 'exceptions'" aggregation Count operator GreaterThan threshold 10 \
-      --description "🚨 ANOMALY: Error spike detected! Investigate for system issues or attacks." \
-      --evaluation-frequency 1m \
-      --window-size 5m \
-      --severity 1 \
-      --action-group-ids "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-critical-alerts" \
-      --tags AlertType=Anomaly Priority=Critical Impact=Errors
+      --condition "count 'LoginQuery' >= 1" \
+      --condition-query LoginQuery="customEvents | where timestamp > ago(30m) | where name == 'SecurityEvent' | where customDimensions.severity in ('warning', 'medium') | summarize SecurityWarnings = count() | where SecurityWarnings > 10" \
+      --evaluation-frequency PT5M \
+      --window-size PT30M \
+      --severity 2 \
+      --description "⚠️ WARNING: Multiple failed login attempts or security warnings detected. Monitor for brute force attacks." \
+      --action-groups "/subscriptions/f244cdf7-5150-4b10-b3f2-d4bff23c5f45/resourceGroups/mindx-individual-banv-rg/providers/Microsoft.Insights/actionGroups/banv-warning-alerts"
 
-    echo "✅ All CRAZY ADVANCED Azure Monitor Alerts created!"
     echo ""
-    echo "🎯 Alert Categories Created:"
-    echo "  🚨 Critical Business Alerts    - Revenue & User Experience"
-    echo "  📊 Business Intelligence Alerts - Conversion & Engagement"
-    echo "  🎯 Performance Alerts          - Latency & Resource Usage"
-    echo "  🔧 Infrastructure Alerts       - Memory & System Health"
-    echo "  🚀 Anomaly Detection           - Traffic & Error Patterns"
+    echo "📱 LOGGING-BASED ALERTS WITH MOBILE NOTIFICATIONS SUMMARY:"
+    echo "=========================================================="
+    echo "📱 CRITICAL (Mobile + Email):"
+    echo "   🚨 High Request Error Rate (>15%)"
+    echo "   🚨 Security Events Detection" 
+    echo "   🚨 Application Exception Spike"
     echo ""
-    echo "🔥 CRAZY ALERTING SYSTEM WITH 50+ ALERTS IS NOW LIVE!"
+    echo "📱 HIGH PRIORITY (Mobile + Email):"
+    echo "   ⚡ Slow Request Performance (>2s)"
+    echo "   ⚡ Request Volume Drop"
+    echo ""
+    echo "📧 WARNING (Email Only):"
+    echo "   ⚠️ Increased Error Traces"
+    echo "   ⚠️ Failed Login Attempts"
+    echo ""
+    echo "🎯 Your Azure Mobile App will receive notifications for CRITICAL and HIGH PRIORITY issues only!"
+    echo "🔥 LOGGING-BASED MOBILE ALERTING SYSTEM IS READY!"
